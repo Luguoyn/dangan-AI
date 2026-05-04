@@ -1,139 +1,139 @@
 [
   {
-    "character_id": "naegi",
-    "display_name": "苗木诚",
-    "title": "超高校级的幸运",
-    "color": "#33CC55",
-    "is_playable": true,
-    "survival": true,
-    "portraits": { "normal": "", "determined": "", "shocked": "", "thinking": "" }
+	"character_id": "naegi",
+	"display_name": "苗木诚111",
+	"title": "超高校级的幸运",
+	"color": "#33CC55",
+	"is_playable": true,
+	"survival": true,
+	"portraits": { "normal": "", "determined": "", "shocked": "", "thinking": "" }
   },
   {
-    "character_id": "kirigiri",
-    "display_name": "雾切响子",
-    "title": "超高校级的侦探",
-    "color": "#9966CC",
-    "survival": true,
-    "portraits": { "normal": "", "serious": "", "angry": "", "thinking": "", "pleased": "", "disappointed": "" }
+	"character_id": "kirigiri",
+	"display_name": "雾切2响子",
+	"title": "超高校级的侦探",
+	"color": "#9966CC",
+	"survival": true,
+	"portraits": { "normal": "", "serious": "", "angry": "", "thinking": "", "pleased": "", "disappointed": "" }
   },
   {
-    "character_id": "togami",
-    "display_name": "十神白夜",
-    "title": "超高校级的贵公子",
-    "color": "#CCAA33",
-    "survival": true,
-    "portraits": { "normal": "", "smug": "", "angry": "" }
+	"character_id": "togami",
+	"display_name": "十神白夜",
+	"title": "超高校级的贵公子",
+	"color": "#CCAA33",
+	"survival": true,
+	"portraits": { "normal": "", "smug": "", "angry": "" }
   },
   {
-    "character_id": "asahina",
-    "display_name": "朝日奈葵",
-    "title": "超高校级的游泳选手",
-    "color": "#4499CC",
-    "survival": true,
-    "portraits": { "normal": "", "worried": "", "scared": "", "happy": "" }
+	"character_id": "asahina",
+	"display_name": "朝日奈葵",
+	"title": "超高校级的游泳选手",
+	"color": "#4499CC",
+	"survival": true,
+	"portraits": { "normal": "", "worried": "", "scared": "", "happy": "" }
   },
   {
-    "character_id": "fukawa",
-    "display_name": "腐川冬子",
-    "title": "超高校级的文学少女",
-    "color": "#885577",
-    "survival": true,
-    "portraits": { "normal": "", "shy": "", "angry": "" }
+	"character_id": "fukawa",
+	"display_name": "腐川冬子",
+	"title": "超高校级的文学少女",
+	"color": "#885577",
+	"survival": true,
+	"portraits": { "normal": "", "shy": "", "angry": "" }
   },
   {
-    "character_id": "yamada",
-    "display_name": "山田一二三",
-    "title": "超高校级的同人作家",
-    "color": "#CC7733",
-    "survival": true,
-    "portraits": { "normal": "", "excited": "" }
+	"character_id": "yamada",
+	"display_name": "山田一二三",
+	"title": "超高校级的同人作家",
+	"color": "#CC7733",
+	"survival": true,
+	"portraits": { "normal": "", "excited": "" }
   },
   {
-    "character_id": "celes",
-    "display_name": "塞蕾丝缇雅",
-    "title": "超高校级的赌徒",
-    "color": "#333333",
-    "survival": true,
-    "portraits": { "normal": "", "smile": "", "angry": "" }
+	"character_id": "celes",
+	"display_name": "塞蕾丝缇雅",
+	"title": "超高校级的赌徒",
+	"color": "#333333",
+	"survival": true,
+	"portraits": { "normal": "", "smile": "", "angry": "" }
   },
   {
-    "character_id": "ishimaru",
-    "display_name": "石丸清多夏",
-    "title": "超高校级的风纪委员",
-    "color": "#DDDDDD",
-    "survival": true,
-    "portraits": { "normal": "", "angry": "", "crying": "" }
+	"character_id": "ishimaru",
+	"display_name": "石丸清多夏",
+	"title": "超高校级的风纪委员",
+	"color": "#DDDDDD",
+	"survival": true,
+	"portraits": { "normal": "", "angry": "", "crying": "" }
   },
   {
-    "character_id": "owada",
-    "display_name": "大和田纹土",
-    "title": "超高校级的暴走族",
-    "color": "#CC6644",
-    "survival": true,
-    "portraits": { "normal": "", "angry": "", "laugh": "" }
+	"character_id": "owada",
+	"display_name": "大和田纹土",
+	"title": "超高校级的暴走族",
+	"color": "#CC6644",
+	"survival": true,
+	"portraits": { "normal": "", "angry": "", "laugh": "" }
   },
   {
-    "character_id": "chihiro",
-    "display_name": "不二咲千寻",
-    "title": "超高校级的程序员",
-    "color": "#88CC88",
-    "survival": true,
-    "portraits": { "normal": "", "shy": "", "crying": "" }
+	"character_id": "chihiro",
+	"display_name": "不二咲千寻",
+	"title": "超高校级的程序员",
+	"color": "#88CC88",
+	"survival": true,
+	"portraits": { "normal": "", "shy": "", "crying": "" }
   },
   {
-    "character_id": "maizono",
-    "display_name": "舞园沙耶香",
-    "title": "超高校级的偶像",
-    "color": "#FF88AA",
-    "survival": true,
-    "portraits": { "normal": "", "smile": "", "serious": "" }
+	"character_id": "maizono",
+	"display_name": "舞园沙耶香",
+	"title": "超高校级的偶像",
+	"color": "#FF88AA",
+	"survival": true,
+	"portraits": { "normal": "", "smile": "", "serious": "" }
   },
   {
-    "character_id": "kuwata",
-    "display_name": "桑田怜恩",
-    "title": "超高校级的棒球选手",
-    "color": "#EE4444",
-    "survival": true,
-    "portraits": { "normal": "", "angry": "" }
+	"character_id": "kuwata",
+	"display_name": "桑田怜恩",
+	"title": "超高校级的棒球选手",
+	"color": "#EE4444",
+	"survival": true,
+	"portraits": { "normal": "", "angry": "" }
   },
   {
-    "character_id": "hagakure",
-    "display_name": "叶隐康比吕",
-    "title": "超高校级的占卜师",
-    "color": "#AA8844",
-    "survival": true,
-    "portraits": { "normal": "", "scared": "" }
+	"character_id": "hagakure",
+	"display_name": "叶隐康比吕",
+	"title": "超高校级的占卜师",
+	"color": "#AA8844",
+	"survival": true,
+	"portraits": { "normal": "", "scared": "" }
   },
   {
-    "character_id": "enogi",
-    "display_name": "江之岛盾子",
-    "title": "超高校级的辣妹",
-    "color": "#FF6699",
-    "survival": true,
-    "portraits": { "normal": "", "smile": "", "bored": "" }
+	"character_id": "enogi",
+	"display_name": "江之岛盾子",
+	"title": "超高校级的辣妹",
+	"color": "#FF6699",
+	"survival": true,
+	"portraits": { "normal": "", "smile": "", "bored": "" }
   },
   {
-    "character_id": "sakura",
-    "display_name": "大神樱",
-    "title": "超高校级的格斗家",
-    "color": "#996644",
-    "survival": true,
-    "portraits": { "normal": "", "angry": "" }
+	"character_id": "sakura",
+	"display_name": "大神樱",
+	"title": "超高校级的格斗家",
+	"color": "#996644",
+	"survival": true,
+	"portraits": { "normal": "", "angry": "" }
   },
   {
-    "character_id": "alter_ego",
-    "display_name": "Alter Ego",
-    "title": "超高校级的AI",
-    "color": "#44CCCC",
-    "survival": true,
-    "portraits": { "normal": "" }
+	"character_id": "alter_ego",
+	"display_name": "Alter Ego",
+	"title": "超高校级的AI",
+	"color": "#44CCCC",
+	"survival": true,
+	"portraits": { "normal": "" }
   },
   {
-    "character_id": "monokuma",
-    "display_name": "黑白熊",
-    "title": "学园长",
-    "color": "#FFFFFF",
-    "survival": true,
-    "portraits": { "normal": "", "laugh": "", "angry": "", "surprised": "" }
+	"character_id": "monokuma",
+	"display_name": "黑白熊",
+	"title": "学园长",
+	"color": "#FFFFFF",
+	"survival": true,
+	"portraits": { "normal": "", "laugh": "", "angry": "", "surprised": "" }
   }
 ]

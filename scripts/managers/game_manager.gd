@@ -29,11 +29,10 @@ func clear_flag(flag_name: String) -> void:
 func add_affection(char_id: String, amount: int) -> void:
 	if not affection.has(char_id):
 		affection[char_id] = 0
-	affection[char_id] += amount
-	# 死去的角色不再累计好感度
 	var cd := CharacterManager.get_character(char_id)
 	if cd and not cd.survival:
 		return
+	affection[char_id] += amount
 	affection[char_id] = clampi(affection[char_id], -100, 100)
 
 func get_affection(char_id: String) -> int:

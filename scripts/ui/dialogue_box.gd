@@ -86,6 +86,8 @@ func _create_auto_timer() -> void:
 	add_child(_auto_timer)
 
 func _on_dialogue_show(data: Dictionary) -> void:
+	if not is_inside_tree():
+		return
 	var speaker: String = data.get("speaker", "???")
 	var speaker_label: String = data.get("speaker_label", speaker)
 	_full_text = data.get("text", "")

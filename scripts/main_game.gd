@@ -20,7 +20,15 @@ func _ready() -> void:
 	_create_ui_layers()
 	_connect_signals()
 	_place_demo_content()
-	print("[MainGame] 2D 场景初始化完成。WASD/方向键移动，接近 NPC/调查点按 Enter 交互。")
+	print("[MainGame] 2D 场景初始化完成。WASD/方向键移动，E键互动，T键进入裁判场。")
+
+func _input(event: InputEvent) -> void:
+	if event is InputEventKey and event.keycode == KEY_T and event.pressed:
+		if ScriptInterpreter.is_executing or ScriptInterpreter.is_waiting_input:
+			return
+		if SceneManager.get_current_scene_id() == "courtroom_3d":
+			return
+		SceneManager.load_scene_direct("res://scenes/3d/courtroom.tscn")
 
 func _create_2d_world() -> void:
 	var bg := ColorRect.new()
@@ -173,6 +181,23 @@ func _add_investigation_point(point_id: String, pos: Vector2) -> void:
 func _connect_signals() -> void:
 	EventBus.npc_interacted.connect(_on_npc_interacted)
 	EventBus.investigation_point_clicked.connect(_on_investigation_point_clicked)
+	EventBus.scene_loaded.connect(_on_scene_changed)
+
+var _ui_active: bool = true
+
+func _on_scene_changed(scene_id: String) -> void:
+	if scene_id != "main":
+		_ui_active = false
+		if _dialogue_box:
+			_dialogue_box.hide()
+			if EventBus.dialogue_show.is_connected(_dialogue_box._on_dialogue_show):
+				EventBus.dialogue_show.disconnect(_dialogue_box._on_dialogue_show)
+		if _choice_panel:
+			_choice_panel.hide()
+	else:
+		_ui_active = true
+		if _dialogue_box and not EventBus.dialogue_show.is_connected(_dialogue_box._on_dialogue_show):
+			EventBus.dialogue_show.connect(_dialogue_box._on_dialogue_show)
 
 func _on_npc_interacted(char_id: String) -> void:
 	print("[NPC] 与 %s 对话" % char_id)

@@ -12,6 +12,11 @@ signal transition_finished(new_scene_id: String)
 
 func _ready() -> void:
 	EventBus.scene_load_requested.connect(_on_scene_load_requested)
+	_register_default_scenes()
+
+func _register_default_scenes() -> void:
+	register_scene("main", "res://scenes/main.tscn")
+	register_scene("courtroom_3d", "res://scenes/3d/courtroom.tscn")
 
 func register_scene(scene_id: String, scene_path: String) -> void:
 	_scene_registry[scene_id] = scene_path

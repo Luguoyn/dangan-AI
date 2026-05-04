@@ -1,0 +1,35 @@
+{
+  "script_id": "courtroom_test",
+  "events": [
+    {"cmd": "comment", "text": "=== 裁判场测试 ==="},
+
+    {"cmd": "dialogue", "speaker": "monokuma",
+     "text": "噗呼呼呼~欢迎来到学级裁判！我是你们的学园长，黑白熊！",
+     "camera": "wide"},
+
+    {"cmd": "dialogue", "speaker": "kirigiri",
+     "text": "……已经准备好了。让我们开始推理吧。",
+     "camera": "closeup"},
+
+    {"cmd": "dialogue", "speaker": "togami",
+     "text": "哼，庶民们。就让本少爷来揭穿真相好了。",
+     "camera": "closeup"},
+
+    {"cmd": "dialogue", "speaker": "asahina",
+     "text": "等、等一下！我还有些问题不明白……",
+     "camera": "closeup"},
+
+    {"cmd": "dialogue", "speaker": "monokuma",
+     "text": "那么——学级裁判，正式开始！",
+     "camera": "wide"},
+
+    {"cmd": "screen_effect", "effect": "flash", "intensity": 0.5, "duration": 0.3},
+
+    {"cmd": "dialogue", "speaker": "narrator",
+     "text": "（法庭中央的聚光灯骤然亮起，裁判场的紧张气氛达到顶点。）",
+     "camera": "overview"},
+
+    {"cmd": "comment", "text": "=== 测试三难度HP ==="},
+    {"cmd": "set_flag", "flag": "test_hp_demo", "value": true}
+  ]
+}

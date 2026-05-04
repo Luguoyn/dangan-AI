@@ -1,0 +1,23 @@
+{
+  "config_id": "debate_test_01",
+  "spawn_interval": 2.0,
+  "require_sequential": true,
+  "available_evidence_ids": ["ev_test_01", "ev_test_02"],
+  "noise_texts": [
+    "确实如此呢……",
+    "好像有道理……",
+    "但是也有其他可能性……",
+    "我不太确定……",
+    "让我再想想……"
+  ],
+  "phrases": [
+    {"text": "被害者是在图书馆被发现的。", "speaker_id": "kirigiri", "is_contradiction": false, "speed": 50},
+    {"text": "死亡推定时刻是晚上10点。", "speaker_id": "asahina", "is_contradiction": false, "speed": 55},
+    {"text": "但是！案发现场并没有发现凶器！", "speaker_id": "togami", "is_contradiction": false, "speed": 60},
+    {"text": "凶器是厨房里的水果刀。", "speaker_id": "owada", "is_contradiction": true, "required_evidence_id": "ev_knife_01", "speed": 40},
+    {"text": "水果刀上没有任何指纹。", "speaker_id": "fukawa", "is_contradiction": false, "speed": 50},
+    {"text": "也就是说凶手戴了手套？", "speaker_id": "hagakure", "is_contradiction": false, "speed": 65},
+    {"text": "被害者的死亡时间是下午3点。", "speaker_id": "ishimaru", "is_contradiction": true, "required_evidence_id": "ev_clock_01", "speed": 45},
+    {"text": "所有人都没有不在场证明……", "speaker_id": "yamada", "is_contradiction": false, "speed": 50}
+  ]
+}

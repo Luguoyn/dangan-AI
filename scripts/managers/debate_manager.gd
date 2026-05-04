@@ -20,6 +20,28 @@ func _ready() -> void:
 	EventBus.rebuttal_finished.connect(_on_minigame_result.bind("rebuttal"))
 	EventBus.hangman_finished.connect(_on_minigame_result.bind("hangman"))
 	EventBus.climax_inference_finished.connect(_on_minigame_result.bind("climax"))
+	EventBus.start_nonstop_debate.connect(_on_start_nonstop_debate)
+
+var _active_debate_ui: Node
+
+func _on_start_nonstop_debate(config_id: String) -> void:
+	if is_instance_valid(_active_debate_ui):
+		return
+	var path := "res://resources/debate_configs/" + config_id + ".json"
+	if not FileAccess.file_exists(path):
+		push_error("DebateManager: Config not found: " + path)
+		return
+	var file := FileAccess.open(path, FileAccess.READ)
+	var text := file.get_as_text()
+	file.close()
+	var data: Variant = JSON.parse_string(text)
+	var config := NonStopDebateConfig.new()
+	config.load_from_dict(data)
+	var ui := NonStopDebateUI.new()
+	_active_debate_ui = ui
+	ui.debate_finished.connect(func(_s): _active_debate_ui = null)
+	get_tree().root.add_child(ui)
+	ui.start_debate(config)
 
 func _load_difficulty_config() -> void:
 	difficulty_config = {

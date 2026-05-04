@@ -23,7 +23,22 @@ func _ready() -> void:
 	_build_ui()
 	_assign_characters_to_podiums()
 	EventBus.trial_started.emit()
-	print("[CourtroomScene] 裁判场初始化完成，%d 个站位已分配，按B返回2D场景" % PODIUM_COUNT)
+	_add_test_evidence()
+	print("[CourtroomScene] 裁判场初始化完成，%d 个站位。D=无休止议论, Space=测试对话, B=返回" % PODIUM_COUNT)
+
+func _add_test_evidence() -> void:
+	EvidenceManager.add_evidence({
+		"id": "ev_knife_01", "name": "凶器·水果刀",
+		"description": "在厨房发现的水果刀，刀刃上有血迹。", "type": "physical"
+	})
+	EvidenceManager.add_evidence({
+		"id": "ev_clock_01", "name": "破碎的时钟",
+		"description": "在图书馆发现的时钟，停止在下午3点。", "type": "physical"
+	})
+	EvidenceManager.add_evidence({
+		"id": "ev_test_01", "name": "目击证言·朝日奈",
+		"description": "朝日奈声称在晚上9点看到过被害者。", "type": "testimony"
+	})
 
 func _input(event: InputEvent) -> void:
 	if ScriptInterpreter.is_executing or ScriptInterpreter.is_waiting_input:
@@ -34,6 +49,9 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_SPACE and event.pressed:
 			show_hp_bar()
 			ScriptInterpreter.load_script("res://story/courtroom_test.script.json")
+		if event.keycode == KEY_D and event.pressed:
+			show_hp_bar()
+			EventBus.start_nonstop_debate.emit("debate_test_01")
 
 func _build_environment() -> void:
 	var env := WorldEnvironment.new()

@@ -24,7 +24,7 @@ func _ready() -> void:
 	_assign_characters_to_podiums()
 	EventBus.trial_started.emit()
 	_add_test_evidence()
-	print("[CourtroomScene] 裁判场初始化完成，%d 个站位。D=无休止议论, Space=测试对话, B=返回" % PODIUM_COUNT)
+	print("[CourtroomScene] 裁判场就绪。D=议论 R=反论 H=拼字 C=高潮 Space=对话 B=返回")
 
 func _add_test_evidence() -> void:
 	EvidenceManager.add_evidence({
@@ -52,6 +52,15 @@ func _input(event: InputEvent) -> void:
 		if event.keycode == KEY_D and event.pressed:
 			show_hp_bar()
 			EventBus.start_nonstop_debate.emit("debate_test_01")
+		if event.keycode == KEY_R and event.pressed:
+			show_hp_bar()
+			EventBus.start_rebuttal.emit("rebuttal_test_01")
+		if event.keycode == KEY_H and event.pressed:
+			show_hp_bar()
+			EventBus.start_hangman.emit("hangman_test_letter", "letter")
+		if event.keycode == KEY_C and event.pressed:
+			show_hp_bar()
+			EventBus.start_climax_inference.emit("climax_test_01")
 
 func _build_environment() -> void:
 	var env := WorldEnvironment.new()

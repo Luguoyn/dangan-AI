@@ -1,0 +1,10 @@
+{
+  "config_id": "rebuttal_test_01",
+  "opponent_id": "togami",
+  "slash_lines": [
+    "胡说八道！", "证据呢？", "不可能！", "这只是你的猜测！", "我不接受！"
+  ],
+  "slash_timings": [1.5, 3.2, 5.0, 6.8, 8.5],
+  "slash_speeds": [250, 280, 300, 320, 350],
+  "on_success_dialogue": "……哼，看来你确实有两下子。"
+}

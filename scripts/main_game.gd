@@ -99,21 +99,28 @@ func _create_ui_layers() -> void:
 	add_child(_screen_effects)
 
 func _place_demo_content() -> void:
-	_add_npc("kirigiri", "雾切响子", Vector2(600, 600))
-	_add_npc("asahina", "朝日奈葵", Vector2(800, 500))
-	_add_npc("togami", "十神白夜", Vector2(1200, 550))
+	_add_npc("kirigiri", Vector2(600, 600))
+	_add_npc("asahina", Vector2(800, 500))
+	_add_npc("togami", Vector2(1200, 550))
 
 	_add_investigation_point("desk_01", Vector2(400, 650))
 	_add_investigation_point("cabinet_01", Vector2(1400, 700))
 	_add_investigation_point("evidence_01", Vector2(960, 400))
 
-func _add_npc(char_id: String, display_name: String, pos: Vector2) -> void:
+func _add_npc(char_id: String, pos: Vector2) -> void:
+	var cd := CharacterManager.get_character(char_id)
+	var display_name := char_id
+	var npc_color := Color(0.5, 0.5, 0.5)
+	if cd:
+		display_name = cd.display_name
+		npc_color = cd.color
+
 	var npc := InteractableNPC.new()
 	npc.character_id = char_id
 	npc.position = pos
 
 	var sprite := ColorRect.new()
-	sprite.color = _get_character_color(char_id)
+	sprite.color = npc_color
 	sprite.size = Vector2(40, 60)
 	sprite.position = Vector2(-20, -50)
 	npc.add_child(sprite)
@@ -205,10 +212,3 @@ func _on_investigation_point_clicked(point_id: String) -> void:
 
 func get_player() -> PlayerController:
 	return _player
-
-func _get_character_color(char_id: String) -> Color:
-	match char_id:
-		"kirigiri": return Color(0.6, 0.3, 0.7)
-		"asahina":  return Color(0.3, 0.5, 0.8)
-		"togami":   return Color(0.8, 0.6, 0.2)
-		_:          return Color(0.5, 0.5, 0.5)

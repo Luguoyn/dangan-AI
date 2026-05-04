@@ -280,7 +280,13 @@ func _evaluate_affection_condition(expr: String) -> bool:
 # ============================================================
 
 func _handle_dialogue(cmd: Dictionary) -> bool:
-	EventBus.dialogue_show.emit(cmd)
+	var enriched := cmd.duplicate()
+	if not enriched.has("speaker_label") or str(enriched.get("speaker_label", "")) == "":
+		var speaker_id: String = enriched.get("speaker", "")
+		var cd := CharacterManager.get_character(speaker_id)
+		if cd:
+			enriched["speaker_label"] = cd.get_display_label()
+	EventBus.dialogue_show.emit(enriched)
 	return true
 
 func _handle_set_bg(cmd: Dictionary) -> bool:

@@ -1,0 +1,40 @@
+{
+  "game_title": "绝望学园·推理默示录",
+  "version": "1.0",
+  "chapters": [
+    {
+      "chapter_id": "prologue",
+      "label": "序章",
+      "entry_script": "prologue_opening.script.json",
+      "conditions": null
+    },
+    {
+      "chapter_id": "chapter_01",
+      "label": "第一章 · 染血的开学典礼",
+      "phases": [
+        {
+          "phase": "daily",
+          "script_file": "chapter_01_daily.script.json",
+          "completion_flag": "ch01_daily_done"
+        },
+        {
+          "phase": "deadly",
+          "script_file": "chapter_01_deadly.script.json",
+          "condition": "flag:ch01_daily_done",
+          "completion_flag": "ch01_investigation_done"
+        },
+        {
+          "phase": "trial",
+          "script_file": "chapter_01_trial.script.json",
+          "condition": "flag:ch01_investigation_done",
+          "completion_flag": "ch01_trial_done"
+        }
+      ]
+    }
+  ],
+  "global_flags": {
+    "difficulty": "normal",
+    "affection": {},
+    "unlocked_skills": ["voice_beauty", "focus"]
+  }
+}

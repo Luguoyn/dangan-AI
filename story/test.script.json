@@ -1,0 +1,155 @@
+{
+  "script_name": "全指令测试脚本",
+  "script_id": "test_all_commands",
+  "events": [
+    {"cmd": "comment", "text": "=== 测试：基础演出指令 ==="},
+
+    {"cmd": "dialogue", "speaker": "narrator", "expression": "normal",
+     "text": "这是测试对话——ScriptInterpreter 应该能解析并执行此指令。",
+     "camera": "closeup"},
+
+    {"cmd": "dialogue", "speaker": "monokuma", "expression": "laugh",
+     "text": "噗呼呼呼~测试继续进行！",
+     "voice": "monokuma_test", "camera": "wide"},
+
+    {"cmd": "set_bg", "bg_id": "classroom_1", "transition": "fade"},
+
+    {"cmd": "bgm", "action": "play", "bgm_id": "test_bgm", "volume": 0.7, "fade_duration": 1.0},
+
+    {"cmd": "sfx", "sfx_id": "test_sfx", "volume": 1.0},
+
+    {"cmd": "screen_effect", "effect": "shake", "intensity": 0.3, "duration": 0.5},
+
+    {"cmd": "show_character", "character": "kirigiri", "expression": "serious", "position": "left"},
+
+    {"cmd": "hide_character", "character": "kirigiri"},
+
+    {"cmd": "comment", "text": "=== 测试：证据指令 ==="},
+
+    {"cmd": "add_evidence", "evidence": {
+      "id": "ev_test_01",
+      "name": "测试证据·水果刀",
+      "description": "这是一把水果刀，用于测试证据系统。",
+      "icon": "res://assets/images/evidence/knife.png",
+      "type": "physical"
+    }},
+
+    {"cmd": "update_evidence", "evidence_id": "ev_test_01",
+     "new_name": "测试证据·染血的水果刀",
+     "new_description": "更新后的描述：刀柄上有指纹。"},
+
+    {"cmd": "comment", "text": "=== 测试：标记位与好感度 ==="},
+
+    {"cmd": "set_flag", "flag": "test_flag_01", "value": true},
+
+    {"cmd": "affection", "character": "kirigiri", "amount": 5},
+
+    {"cmd": "unlock_skill", "skill_id": "voice_beauty"},
+
+    {"cmd": "comment", "text": "=== 测试：条件跳转 ==="},
+
+    {"cmd": "if", "condition": "flag:test_flag_01",
+     "jump_true": "label:flag_is_true",
+     "jump_false": "label:flag_is_false"},
+
+    {"cmd": "label", "name": "flag_is_false"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "ERROR: flag 应为 true"},
+    {"cmd": "jump", "target": "label:after_condition_test"},
+
+    {"cmd": "label", "name": "flag_is_true"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "OK: flag 条件跳转正确"},
+
+    {"cmd": "label", "name": "after_condition_test"},
+
+    {"cmd": "comment", "text": "=== 测试：has_evidence 条件 ==="},
+
+    {"cmd": "if", "condition": "has_evidence:ev_test_01",
+     "jump_true": "label:has_ev",
+     "jump_false": "label:no_ev"},
+
+    {"cmd": "label", "name": "no_ev"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "ERROR: 应已收集证据"},
+    {"cmd": "jump", "target": "label:after_evidence_test"},
+
+    {"cmd": "label", "name": "has_ev"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "OK: has_evidence 条件判断正确"},
+
+    {"cmd": "label", "name": "after_evidence_test"},
+
+    {"cmd": "comment", "text": "=== 测试：affection 条件 ==="},
+
+    {"cmd": "if", "condition": "affection:kirigiri >= 3",
+     "jump_true": "label:affection_ok",
+     "jump_false": "label:affection_low"},
+
+    {"cmd": "label", "name": "affection_low"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "ERROR: 好感度应 >= 3"},
+
+    {"cmd": "label", "name": "affection_ok"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "OK: affection 条件判断正确"},
+
+    {"cmd": "comment", "text": "=== 测试：分支选项指令 ==="},
+
+    {"cmd": "choice", "prompt": "这是一个测试选项，请选择：",
+     "choices": [
+       {"text": "选项A — 正确", "jump": "label:choice_correct", "affection": {"naegi": 2}},
+       {"text": "选项B — 错误", "jump": "label:choice_wrong", "affection": {"naegi": -1}}
+     ],
+     "correct_index": 0, "wrong_penalty": 10},
+
+    {"cmd": "label", "name": "choice_wrong"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "你选了选项B（错误选项）。"},
+
+    {"cmd": "label", "name": "choice_correct"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "你选了选项A（正确选项）。"},
+
+    {"cmd": "comment", "text": "=== 测试：remove_evidence ==="},
+
+    {"cmd": "remove_evidence", "evidence_id": "ev_test_01"},
+
+    {"cmd": "comment", "text": "=== 测试：remove后判定 has_evidence ==="},
+
+    {"cmd": "if", "condition": "has_evidence:ev_test_01",
+     "jump_true": "label:still_has_ev",
+     "jump_false": "label:ev_removed_ok"},
+
+    {"cmd": "label", "name": "still_has_ev"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "ERROR: 证据应已被移除"},
+
+    {"cmd": "label", "name": "ev_removed_ok"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "OK: remove_evidence 工作正常"},
+
+    {"cmd": "comment", "text": "=== 测试：学级裁判小游戏指令（占位符） ==="},
+
+    {"cmd": "start_nonstop_debate", "config_id": "debate_ch01_01",
+     "on_success": "label:debate_success", "on_fail": "label:debate_fail"},
+
+    {"cmd": "label", "name": "debate_success"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "OK: 无休止议论 → 成功路径，jump 正确"},
+    {"cmd": "jump", "target": "label:after_debate_test"},
+
+    {"cmd": "label", "name": "debate_fail"},
+    {"cmd": "dialogue", "speaker": "narrator", "text": "ERROR: 无休止议论 → 进入了错误路径"},
+    {"cmd": "jump", "target": "label:after_debate_test"},
+
+    {"cmd": "label", "name": "after_debate_test"},
+
+    {"cmd": "comment", "text": "=== 测试：save_prompt ==="},
+
+    {"cmd": "save_prompt", "text": "这是一个测试存档提示，要存档吗？"},
+
+    {"cmd": "comment", "text": "=== 测试：skill_select ==="},
+
+    {"cmd": "skill_select"},
+
+    {"cmd": "comment", "text": "=== 测试：trial_result ==="},
+
+    {"cmd": "trial_result", "result": "guilty",
+     "culprit": "test_culprit", "execution_scene": "execution_test"},
+
+    {"cmd": "comment", "text": "=== 所有指令测试完成 ==="},
+
+    {"cmd": "dialogue", "speaker": "narrator",
+     "text": "测试剧本执行完毕。如果看到这条消息且没有报错，说明 ScriptInterpreter 所有指令处理器工作正常。"}
+  ]
+}

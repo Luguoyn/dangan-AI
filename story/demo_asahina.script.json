@@ -1,0 +1,16 @@
+{
+  "script_id": "demo_asahina",
+  "events": [
+    {"cmd": "show_character", "character": "asahina", "expression": "normal", "position": "left"},
+    {"cmd": "dialogue", "speaker": "asahina", "speaker_label": "朝日奈葵",
+     "text": "啊，苗木同学！你也觉得这里气氛很奇怪对吧？",
+     "expression": "worried"},
+    {"cmd": "dialogue", "speaker": "asahina", "speaker_label": "朝日奈葵",
+     "text": "我刚刚在走廊那边好像听到了什么声音……好可怕……",
+     "expression": "scared"},
+    {"cmd": "screen_effect", "effect": "vignette", "intensity": 0.4, "duration": 1.5},
+    {"cmd": "dialogue", "speaker": "narrator", "speaker_label": "",
+     "text": "（朝日奈颤抖着指向走廊的方向……）"},
+    {"cmd": "hide_character", "character": "asahina"}
+  ]
+}

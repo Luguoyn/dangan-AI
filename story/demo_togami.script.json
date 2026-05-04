@@ -1,0 +1,16 @@
+{
+  "script_id": "demo_togami",
+  "events": [
+    {"cmd": "show_character", "character": "togami", "expression": "smug", "position": "right"},
+    {"cmd": "dialogue", "speaker": "togami", "speaker_label": "十神白夜",
+     "text": "哼，庶民就是庶民。这种程度的事件就让你们惊慌失措了吗？",
+     "expression": "smug"},
+    {"cmd": "dialogue", "speaker": "togami", "speaker_label": "十神白夜",
+     "text": "我已经看穿了真相。不过……告诉你们这些蠢货也是浪费时间。",
+     "expression": "angry"},
+    {"cmd": "screen_effect", "effect": "flash", "intensity": 0.3, "duration": 0.2},
+    {"cmd": "dialogue", "speaker": "narrator", "speaker_label": "",
+     "text": "（十神傲慢地转过了身……）"},
+    {"cmd": "hide_character", "character": "togami"}
+  ]
+}

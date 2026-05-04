@@ -1,0 +1,58 @@
+{
+  "script_id": "demo_interaction",
+  "script_name": "Demo NPC Interaction",
+  "events": [
+    {"cmd": "show_character", "character": "kirigiri", "expression": "normal", "position": "left"},
+
+    {"cmd": "dialogue", "speaker": "kirigiri", "speaker_label": "雾切响子",
+     "text": "你好，苗木同学。你注意到教室里的异常了吗？",
+     "expression": "normal", "camera": "closeup"},
+
+    {"cmd": "dialogue", "speaker": "kirigiri", "speaker_label": "雾切响子",
+     "text": "我有种不好的预感……这里似乎隐藏着什么东西。",
+     "expression": "serious", "camera": "closeup"},
+
+    {"cmd": "screen_effect", "effect": "shake", "intensity": 0.4, "duration": 0.5},
+
+    {"cmd": "dialogue", "speaker": "narrator", "speaker_label": "",
+     "text": "（地面似乎微微震动了一下……）",
+     "expression": "normal"},
+
+    {"cmd": "screen_effect", "effect": "vignette", "intensity": 0.6, "duration": 2.0},
+
+    {"cmd": "choice", "prompt": "你打算怎么做？",
+     "choices": [
+       {"text": "继续调查教室", "jump": "label:investigate", "affection": {"kirigiri": 2}},
+       {"text": "先去走廊看看", "jump": "label:go_hallway", "affection": {"kirigiri": -1}},
+       {"text": "询问雾切的意见", "jump": "label:ask_opinion", "affection": {"kirigiri": 3}}
+     ],
+     "correct_index": 0, "wrong_penalty": 10},
+
+    {"cmd": "label", "name": "investigate"},
+    {"cmd": "dialogue", "speaker": "kirigiri", "speaker_label": "雾切响子",
+     "text": "明智的选择。仔细观察每一个角落。",
+     "expression": "pleased"},
+
+    {"cmd": "screen_effect", "effect": "flash", "intensity": 0.5, "duration": 0.3},
+    {"cmd": "jump", "target": "label:end_demo"},
+
+    {"cmd": "label", "name": "go_hallway"},
+    {"cmd": "dialogue", "speaker": "kirigiri", "speaker_label": "雾切响子",
+     "text": "……可我觉得这里才是关键。",
+     "expression": "disappointed"},
+    {"cmd": "jump", "target": "label:end_demo"},
+
+    {"cmd": "label", "name": "ask_opinion"},
+    {"cmd": "dialogue", "speaker": "kirigiri", "speaker_label": "雾切响子",
+     "text": "我的意见？——仔细看看那边的桌子下面。",
+     "expression": "thinking"},
+    {"cmd": "jump", "target": "label:end_demo"},
+
+    {"cmd": "label", "name": "end_demo"},
+    {"cmd": "dialogue", "speaker": "narrator", "speaker_label": "",
+     "text": "（Demo 交互演示结束。试试走近绿色方块来调查，或找其他角色对话。）",
+     "expression": "normal"},
+
+    {"cmd": "hide_character", "character": "kirigiri"}
+  ]
+}

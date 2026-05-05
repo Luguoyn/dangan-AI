@@ -317,7 +317,7 @@ func _on_bullet_arrive(bullet: ColorRect) -> void:
 
 	# 击中真矛盾 → 检查证据
 	if _current_hotspot.get("is_real", false):
-		var required := _current_hotspot.get("required_evidence_id", "")
+		var required: String = _current_hotspot.get("required_evidence_id", "")
 		if _selected_evidence_id == required:
 			_current_target.play_hit_effect()
 			_real_contradiction_hit = true

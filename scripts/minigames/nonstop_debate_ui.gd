@@ -132,8 +132,6 @@ func _process(_delta: float) -> void:
 	_hp_label.text = "HP %d/%d" % [DebateManager.current_hp, DebateManager.max_hp]
 
 func _check_phrase_hover() -> void:
-	_current_target = null
-	_current_hotspot.clear()
 	_crosshair.modulate = Color(0, 1, 1, 0.7)
 	for phrase in _phrases:
 		if not is_instance_valid(phrase):
@@ -144,12 +142,8 @@ func _check_phrase_hover() -> void:
 		if hs.is_empty():
 			_crosshair.modulate = Color(0.5, 0.5, 0.5, 0.5)
 		elif hs.get("is_real", false):
-			_current_target = phrase
-			_current_hotspot = hs
 			_crosshair.modulate = Color(1, 0.95, 0.3, 1.0)
 		elif hs.get("is_fake", false):
-			_current_target = phrase
-			_current_hotspot = hs
 			_crosshair.modulate = Color(1, 0.5, 0.1, 0.9)
 		else:
 			_crosshair.modulate = Color(0.5, 0.5, 0.5, 0.5)

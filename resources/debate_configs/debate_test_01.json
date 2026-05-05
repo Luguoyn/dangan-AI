@@ -1,17 +1,64 @@
 {
   "config_id": "debate_test_01",
   "noise_texts": [
-    "确实如此呢……", "好像有道理……", "但我不太确定……",
-    "让我再想想……", "嗯嗯，继续说……"
+    "确实如此呢……", "好像有道理……", "让我再想想……", "嗯嗯，继续说……"
   ],
   "phrases": [
-    {"text": "被害者是在图书馆被发现的。", "speaker_id": "kirigiri", "speak_duration": 3.5},
-    {"text": "死亡推定时刻是晚上10点。", "speaker_id": "asahina", "speak_duration": 3.0},
-    {"text": "但是！案发现场并没有发现凶器！", "speaker_id": "togami", "is_contradiction": true, "is_real_contradiction": false, "required_evidence_id": "ev_fake", "speak_duration": 4.0},
-    {"text": "被害者的死亡时间是下午3点，不是晚上10点。", "speaker_id": "ishimaru", "is_contradiction": true, "is_real_contradiction": true, "required_evidence_id": "ev_clock_01", "speak_duration": 4.5},
-    {"text": "凶器应该是某种利器吧……", "speaker_id": "hagakure", "speak_duration": 2.5},
-    {"text": "水果刀上没有任何指纹。", "speaker_id": "fukawa", "is_contradiction": true, "is_real_contradiction": false, "required_evidence_id": "ev_fake", "speak_duration": 3.5},
-    {"text": "这么说来，凶手一定戴了手套。", "speaker_id": "owada", "speak_duration": 3.0},
-    {"text": "所有人都没有不在场证明……", "speaker_id": "yamada", "speak_duration": 2.5}
+    {
+      "text": "被害者是在图书馆被发现的，大约是晚上10点左右。",
+      "speaker_id": "kirigiri",
+      "speak_duration": 4.0
+    },
+    {
+      "text": "现场并没有发现凶器，也没有打斗痕迹。",
+      "speaker_id": "asahina",
+      "speak_duration": 3.5,
+      "hotspots": [
+        {"text": "没有打斗痕迹", "is_real": false}
+      ]
+    },
+    {
+      "text": "被害者的死亡推定时刻是下午3点，不是晚上10点。",
+      "speaker_id": "ishimaru",
+      "speak_duration": 4.0,
+      "hotspots": [
+        {"text": "不是晚上10点", "is_real": false},
+        {"text": "下午3点", "is_real": true, "required_evidence_id": "ev_clock_01"}
+      ]
+    },
+    {
+      "text": "凶器应该是某种利器，但目前还没有找到。",
+      "speaker_id": "togami",
+      "speak_duration": 3.5,
+      "hotspots": [
+        {"text": "某种利器", "is_real": false}
+      ]
+    },
+    {
+      "text": "这么说来，图书馆的时钟确实停在3点钟方向……",
+      "speaker_id": "hagakure",
+      "speak_duration": 3.0
+    },
+    {
+      "text": "所有人都有不在场证明，这根本不可能！",
+      "speaker_id": "owada",
+      "speak_duration": 3.0,
+      "hotspots": [
+        {"text": "所有人都有不在场证明", "is_real": false}
+      ]
+    },
+    {
+      "text": "时钟被人动过手脚，真正的死亡时间是晚上10点。",
+      "speaker_id": "fukawa",
+      "speak_duration": 3.5,
+      "hotspots": [
+        {"text": "时钟被人动过手脚", "is_real": true, "required_evidence_id": "ev_clock_01"}
+      ]
+    },
+    {
+      "text": "那么凶手到底是谁……真相还隐藏在迷雾之中。",
+      "speaker_id": "yamada",
+      "speak_duration": 3.0
+    }
   ]
 }

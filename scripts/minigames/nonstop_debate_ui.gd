@@ -16,6 +16,7 @@ var _real_contradiction_hit: bool = false
 var _is_evidence_ring_open: bool = false
 var _selected_evidence_id: String = ""
 var _current_target: FloatingPhrase
+var _current_hotspot: Dictionary = {}
 var _can_aim: bool = false
 
 # UI elements
@@ -43,7 +44,7 @@ func start_debate(config: NonStopDebateConfig) -> void:
 	_clear_old_phrases()
 	_total_contradictions = _count_contradictions()
 	_can_aim = true
-	_info_label.text = "找到真正的矛盾！金色闪光=真矛盾 暗黄=假矛盾 灰=普通发言"
+	_info_label.text = "瞄准句中亮色词语！金色=真矛盾 橙色=假矛盾 Tab选言弹发射"
 	_courtroom_ref = _find_courtroom()
 	_start_spawning()
 	_start_noise()
@@ -124,17 +125,27 @@ func _process(_delta: float) -> void:
 
 func _check_phrase_hover() -> void:
 	_current_target = null
+	_current_hotspot.clear()
 	_crosshair.modulate = Color(0, 1, 1, 0.7)
 	for phrase in _phrases:
-		if is_instance_valid(phrase) and phrase.has_point(_crosshair.position):
-			if phrase.is_real_contradiction():
-				_current_target = phrase
-				_crosshair.modulate = Color(1, 0.9, 0.2, 1.0)
-			elif phrase.is_contradiction():
-				_current_target = phrase
-				_crosshair.modulate = Color(1, 0.6, 0.1, 0.9)
-			else:
-				_crosshair.modulate = Color(0.5, 0.5, 0.5, 0.5)
+		if not is_instance_valid(phrase):
+			continue
+		if not phrase.has_point(_crosshair.position):
+			continue
+		var hs := phrase.find_hotspot_at(_crosshair.position)
+		if hs.is_empty():
+			_crosshair.modulate = Color(0.5, 0.5, 0.5, 0.5)
+		elif hs.get("is_real", false):
+			_current_target = phrase
+			_current_hotspot = hs
+			_crosshair.modulate = Color(1, 0.95, 0.3, 1.0)
+		elif hs.get("is_fake", false):
+			_current_target = phrase
+			_current_hotspot = hs
+			_crosshair.modulate = Color(1, 0.5, 0.1, 0.9)
+		else:
+			_crosshair.modulate = Color(0.5, 0.5, 0.5, 0.5)
+		return
 
 func _start_spawning() -> void:
 	_spawn_timer.start(0.5)
@@ -272,8 +283,8 @@ func _on_evidence_selected(ev_id: String) -> void:
 	_info_label.text = "言弹已选择: " + ev_id + " — 点击瞄准的黄色矛盾发言发射！"
 
 func _auto_select_evidence() -> void:
-	if _current_target:
-		_selected_evidence_id = _current_target.get_required_evidence_id()
+	if not _current_hotspot.is_empty():
+		_selected_evidence_id = _current_hotspot.get("required_evidence_id", "")
 
 func _fire_evidence() -> void:
 	if not _current_target:
@@ -290,28 +301,30 @@ func _fire_evidence() -> void:
 
 func _on_bullet_arrive(bullet: ColorRect) -> void:
 	bullet.queue_free()
-	if not is_instance_valid(_current_target):
+	if not is_instance_valid(_current_target) or _current_hotspot.is_empty():
 		return
 
 	# 击中假矛盾 → 扣血
-	if _current_target.is_contradiction() and not _current_target.is_real_contradiction():
+	if _current_hotspot.get("is_fake", false):
 		_current_target.play_hit_effect()
 		DebateManager.damage_hp(8)
 		_info_label.text = "这是假矛盾！-8 HP"
 		_selected_evidence_id = ""
+		_current_hotspot.clear()
 		if DebateManager.current_hp <= 0:
 			_complete_debate(false)
 		return
 
 	# 击中真矛盾 → 检查证据
-	if _current_target.is_real_contradiction():
-		var required := _current_target.get_required_evidence_id()
+	if _current_hotspot.get("is_real", false):
+		var required := _current_hotspot.get("required_evidence_id", "")
 		if _selected_evidence_id == required:
 			_current_target.play_hit_effect()
 			_real_contradiction_hit = true
 			DebateManager.heal_hp(5)
 			_info_label.text = "就是这个！！正确击破！"
 			_selected_evidence_id = ""
+			_current_hotspot.clear()
 			_complete_debate(true)
 		else:
 			_current_target.play_miss_effect()
@@ -321,9 +334,9 @@ func _on_bullet_arrive(bullet: ColorRect) -> void:
 				_complete_debate(false)
 		return
 
-	# 击中普通发言 → 扣一点HP（浪费子弹）
+	# 击中普通文字
 	DebateManager.damage_hp(3)
-	_info_label.text = "这不是矛盾发言！-3 HP"
+	_info_label.text = "这不是矛盾！-3 HP"
 	_selected_evidence_id = ""
 
 func _complete_debate(success: bool) -> void:

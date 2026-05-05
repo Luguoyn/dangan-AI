@@ -21,10 +21,13 @@ func load_from_dict(data: Dictionary) -> void:
 		var dp := DebatePhrase.new()
 		dp.text = p.get("text", "")
 		dp.speaker_id = p.get("speaker_id", "")
-		dp.is_contradiction = p.get("is_contradiction", false)
-		dp.is_real_contradiction = p.get("is_real_contradiction", false)
-		dp.required_evidence_id = p.get("required_evidence_id", "")
 		dp.speed = p.get("speed", 60.0)
 		dp.lifetime = p.get("lifetime", 10.0)
 		dp.speak_duration = p.get("speak_duration", 3.0)
+		# 新格式：hotspots 数组
+		var hlist: Array = p.get("hotspots", [])
+		var arr: Array[Dictionary] = []
+		for h: Dictionary in hlist:
+			arr.append(h)
+		dp.hotspots = arr
 		phrases.append(dp)

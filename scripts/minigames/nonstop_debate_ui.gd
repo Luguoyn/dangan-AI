@@ -396,7 +396,7 @@ func _show_break_effect() -> void:
 	t3.tween_interval(1.0)
 	t3.tween_property(break_label, "modulate:a", 0.0, 0.5)
 	t3.tween_callback(break_label.queue_free)
-	_selected_evidence_id = ""
+	await get_tree().create_timer(1.5).timeout
 
 func _complete_debate(success: bool) -> void:
 	_can_aim = false

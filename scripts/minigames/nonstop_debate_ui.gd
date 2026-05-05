@@ -297,6 +297,22 @@ func _select_evidence_by_index() -> void:
 	_selected_evidence_id = _current_evidence_list[_current_evidence_index].get("id", "")
 	_info_label.text = "言弹: [%s] | Tab列表 | 滚轮选择 | 左键发射" % _get_current_evidence_name()
 
+func _refresh_popup() -> void:
+	for c in _evidence_popup.get_children():
+		c.queue_free()
+	for i in range(_current_evidence_list.size()):
+		var ev = _current_evidence_list[i]
+		var btn = Button.new()
+		btn.text = ev.get("name", "???")
+		btn.custom_minimum_size = Vector2(250, 30)
+		btn.add_theme_font_size_override("font_size", 14)
+		if i == _current_evidence_index:
+			btn.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
+			btn.text = "> " + btn.text
+		else:
+			btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+		_evidence_popup.add_child(btn)
+
 func _get_current_evidence_name() -> String:
 	if _current_evidence_list.is_empty():
 		return "无"

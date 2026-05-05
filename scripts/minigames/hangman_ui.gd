@@ -185,7 +185,7 @@ func _setup_kanji_mode() -> void:
 		_fragment_buttons.append(btn)
 
 func _on_fragment_clicked(btn: Button, item: Dictionary) -> void:
-	var order_idx := item.get("order", -1)
+	var order_idx: int = item.get("order", -1)
 	if item.get("correct", false) and order_idx == _target_index:
 		_target_index += 1
 		btn.modulate = Color.GREEN
@@ -228,7 +228,7 @@ func _on_char_clicked(btn: Button, item: Dictionary) -> void:
 		btn.modulate = Color.RED
 		DebateManager.damage_hp(5)
 		return
-	var expected := _word_config.get("target_chars", [])[_target_index]
+	var expected: String = _word_config.get("target_chars", [])[_target_index]
 	if item["char"] == expected:
 		_progress[_target_index] = expected
 		_target_index += 1

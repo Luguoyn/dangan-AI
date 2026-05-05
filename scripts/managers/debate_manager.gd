@@ -128,7 +128,7 @@ func damage_hp(amount: int) -> void:
 	if not is_trial_active:
 		return
 	var diff_config := _get_current_diff()
-	var multiplied := int(amount * diff_config.get("hp_damage_mult", 1.0))
+	var multiplied: int = int(amount * diff_config.get("hp_damage_mult", 1.0))
 	current_hp = maxi(0, current_hp - multiplied)
 	EventBus.hp_changed.emit(current_hp, max_hp)
 	if current_hp <= 0:

@@ -115,7 +115,7 @@ func _check_slash() -> void:
 			best = s
 	if best == null:
 		return
-	var window := DebateManager.get_diff_param("rebuttal_judge_window", 50)
+	var window: float = DebateManager.get_diff_param("rebuttal_judge_window", 50)
 	if best_dist < window:
 		_on_slash_success(best, best_dist)
 	else:

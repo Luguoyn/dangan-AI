@@ -30,6 +30,9 @@ var _spawn_timer: Timer
 var _courtroom_ref: Node
 var _evidence_popup: VBoxContainer
 var _evidence_popup_visible: bool = false
+var _tab_held: bool = false
+var _tab_press_time: float = 0.0
+var _tab_was_tap: bool = false
 
 func _ready() -> void:
 	_build_ui()
@@ -131,13 +134,6 @@ func _build_ui() -> void:
 	_spawn_timer.one_shot = true
 	_spawn_timer.timeout.connect(_spawn_next_phrase)
 	add_child(_spawn_timer)
-
-func _process(_delta: float) -> void:
-	if not _can_aim:
-		return
-	_crosshair.position = get_viewport().get_mouse_position()
-	_check_phrase_hover()
-	_hp_label.text = "HP %d/%d" % [DebateManager.current_hp, DebateManager.max_hp]
 
 func _check_phrase_hover() -> void:
 	_crosshair.modulate = Color(0, 1, 1, 0.7)
@@ -243,20 +239,30 @@ func _spawn_noise() -> void:
 func _input(event: InputEvent) -> void:
 	if not _can_aim:
 		return
-	# Tab切换言弹列表
+	# Tab按下 → 记录时间
 	if event.is_action_pressed("open_evidence_ring"):
-		_toggle_evidence_popup()
+		_tab_held = true
+		_tab_press_time = 0.0
+		_tab_was_tap = false
 		return
-	# 滚轮选择（列表显示时）
+	# Tab松开 → 判断按了多久
+	if event.is_action_released("open_evidence_ring"):
+		_tab_held = false
+		if _tab_press_time < 0.3:
+			_cycle_evidence()
+		else:
+			_select_evidence_by_index()
+		_evidence_popup_visible = false
+		_evidence_popup.hide()
+		return
+	# 滚轮（列表显示时）
 	if _evidence_popup_visible and event is InputEventMouseButton:
 		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
 			_current_evidence_index = maxi(0, _current_evidence_index - 1)
 			_refresh_popup()
-			_select_evidence_by_index()
 		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
 			_current_evidence_index = mini(_current_evidence_list.size() - 1, _current_evidence_index + 1)
 			_refresh_popup()
-			_select_evidence_by_index()
 	# 左键
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		if _evidence_popup_visible:
@@ -264,36 +270,26 @@ func _input(event: InputEvent) -> void:
 			_evidence_popup.hide()
 		_fire_evidence()
 
-func _toggle_evidence_popup() -> void:
-	_evidence_popup_visible = not _evidence_popup_visible
-	if _evidence_popup_visible:
-		_refresh_popup()
-		_evidence_popup.show()
-	else:
-		_evidence_popup.hide()
+func _process(_delta: float) -> void:
+	if not _can_aim:
+		return
+	if _tab_held:
+		_tab_press_time += _delta
+		if _tab_press_time > 0.3 and not _evidence_popup_visible:
+			_evidence_popup_visible = true
+			_refresh_popup()
+			_evidence_popup.show()
+	# 更新HP
+	_hp_label.text = "HP %d/%d" % [DebateManager.current_hp, DebateManager.max_hp]
+	# 准星
+	_crosshair.position = get_viewport().get_mouse_position()
+	_check_phrase_hover()
 
-func _refresh_popup() -> void:
-	for c in _evidence_popup.get_children():
-		c.queue_free()
-	for i in range(_current_evidence_list.size()):
-		var ev = _current_evidence_list[i]
-		var btn = Button.new()
-		btn.text = ev.get("name", "???")
-		btn.custom_minimum_size = Vector2(250, 30)
-		btn.add_theme_font_size_override("font_size", 14)
-		if i == _current_evidence_index:
-			btn.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
-			btn.text = "> " + btn.text
-		else:
-			btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
-		btn.pressed.connect(_on_evidence_clicked.bind(i))
-		_evidence_popup.add_child(btn)
-
-func _on_evidence_clicked(index: int) -> void:
-	_current_evidence_index = index
+func _cycle_evidence() -> void:
+	if _current_evidence_list.is_empty():
+		return
+	_current_evidence_index = (_current_evidence_index + 1) % _current_evidence_list.size()
 	_select_evidence_by_index()
-	_evidence_popup_visible = false
-	_evidence_popup.hide()
 
 func _select_evidence_by_index() -> void:
 	if _current_evidence_list.is_empty():

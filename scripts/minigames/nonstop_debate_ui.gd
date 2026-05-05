@@ -337,6 +337,8 @@ func _on_bullet_arrive(bullet: Label, phrase: FloatingPhrase, hotspot: Dictionar
 	_info_label.text = "这不是矛盾点……"
 
 func _show_fail_dialogue(text: String) -> void:
+	_spawn_timer.stop()
+	_noise_timer.stop()
 	_bg.hide()
 	_crosshair.hide()
 	_info_label.text = ""
@@ -353,8 +355,9 @@ func _restart_debate_cycle() -> void:
 			p.queue_free()
 	_phrases.clear()
 	_can_aim = true
-	_info_label.text = "再仔细想想……瞄准句中亮色词语！"
+	_info_label.text = "言弹: [%s] | Tab切换 | 左键发射" % _get_current_evidence_name()
 	_spawn_timer.start(0.5)
+	_noise_timer.start()
 
 func _show_break_effect() -> void:
 	# 屏幕碎裂特效 → BREAK文字

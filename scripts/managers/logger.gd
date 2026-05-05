@@ -44,3 +44,6 @@ func export_to_file(path: String = "user://game.log") -> void:
 	for entry in _log_entries:
 		file.store_line("[%s] [%s] %s" % [entry["time"], entry["level"], entry["message"]])
 	file.close()
+
+func clear_logs() -> void:
+	_log_entries.clear()

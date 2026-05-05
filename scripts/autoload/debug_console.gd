@@ -88,7 +88,9 @@ func _on_command(text: String) -> void:
 			if parts.size() >= 2:
 				GameManager.set_flag(parts[1])
 		"log":
-			Logger.export_to_file()
+			var log_node := get_node("/root/Logger") as Node
+			if log_node and log_node.has_method("export_to_file"):
+				log_node.export_to_file()
 		_:
 			_output_label.text += "\n[color=red]未知命令: %s[/color]" % cmd
 	_refresh_status()
@@ -100,7 +102,10 @@ func _on_quick(index: int) -> void:
 		1: _on_command("all_evidence")
 		2: _on_command("affection kirigiri 10")
 		3: SceneManager.load_scene_direct("res://scenes/3d/courtroom.tscn")
-		4: Logger._log_entries.clear()
+		4:
+			var log_node := get_node("/root/Logger") as Node
+			if log_node and log_node.has_method("clear_logs"):
+				log_node.clear_logs()
 
 func _refresh_status() -> void:
 	var hp := "HP: %d/%d" % [DebateManager.current_hp, DebateManager.max_hp]

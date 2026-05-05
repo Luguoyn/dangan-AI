@@ -1,7 +1,8 @@
 {
   "config_id": "debate_test_01",
   "noise_texts": [
-    "确实如此呢……", "好像有道理……", "让我再想想……", "嗯嗯，继续说……"
+    "确实如此呢……", "好像有道理……", "让我再想想……", "嗯嗯，继续说……",
+    "是这样吗……", "不对不对……", "你说的也有道理……"
   ],
   "phrases": [
     {
@@ -14,15 +15,15 @@
       "speaker_id": "asahina",
       "speak_duration": 3.5,
       "hotspots": [
-        {"text": "没有打斗痕迹", "is_real": false}
+        {"text": "没有打斗痕迹", "is_real": false, "fail_dialogue": "没有打斗痕迹……但这不能说明什么。再仔细想想。"}
       ]
     },
     {
       "text": "被害者的死亡推定时刻是下午3点，不是晚上10点。",
       "speaker_id": "ishimaru",
-      "speak_duration": 4.0,
+      "speak_duration": 4.5,
       "hotspots": [
-        {"text": "不是晚上10点", "is_real": false},
+        {"text": "不是晚上10点", "is_real": false, "fail_dialogue": "死亡时间确实不是晚上10点……但真正的矛盾不在这里。"},
         {"text": "下午3点", "is_real": true, "required_evidence_id": "ev_clock_01"}
       ]
     },
@@ -31,7 +32,7 @@
       "speaker_id": "togami",
       "speak_duration": 3.5,
       "hotspots": [
-        {"text": "某种利器", "is_real": false}
+        {"text": "某种利器", "is_real": false, "fail_dialogue": "凶器是利器……但这不是我们要找的矛盾。"}
       ]
     },
     {
@@ -44,7 +45,7 @@
       "speaker_id": "owada",
       "speak_duration": 3.0,
       "hotspots": [
-        {"text": "所有人都有不在场证明", "is_real": false}
+        {"text": "所有人都有不在场证明", "is_real": false, "fail_dialogue": "不在场证明……也许有人说了谎。"}
       ]
     },
     {
@@ -52,7 +53,8 @@
       "speaker_id": "fukawa",
       "speak_duration": 3.5,
       "hotspots": [
-        {"text": "时钟被人动过手脚", "is_real": true, "required_evidence_id": "ev_clock_01"}
+        {"text": "时钟被人动过手脚", "is_real": true, "required_evidence_id": "ev_clock_01"},
+        {"text": "晚上10点", "is_real": false, "fail_dialogue": "晚上10点不是关键……关键是时钟本身。"}
       ]
     },
     {

@@ -289,54 +289,133 @@ func _auto_select_evidence() -> void:
 func _fire_evidence() -> void:
 	if not _current_target:
 		return
+	# 射击动画：子弹+拖尾
 	var bullet := ColorRect.new()
-	bullet.color = Color(0.2, 0.8, 1, 0.8)
-	bullet.size = Vector2(8, 8)
-	bullet.position = _crosshair.position
+	bullet.color = Color(0.3, 0.9, 1)
+	bullet.size = Vector2(10, 10)
+	bullet.position = _crosshair.position - Vector2(5, 5)
 	add_child(bullet)
+
+	var trail := ColorRect.new()
+	trail.color = Color(0.2, 0.7, 1, 0.5)
+	trail.size = Vector2(6, 6)
+	trail.position = bullet.position
+	add_child(trail)
+
 	var target_pos := _current_target.global_position + _current_target.size / 2
 	var tween := create_tween()
-	tween.tween_property(bullet, "position", target_pos, 0.2)
-	tween.tween_callback(_on_bullet_arrive.bind(bullet))
+	tween.set_parallel(true)
+	tween.tween_property(bullet, "position", target_pos, 0.15).set_ease(Tween.EASE_IN)
+	tween.tween_property(trail, "position", target_pos, 0.18).set_ease(Tween.EASE_IN)
+	tween.tween_property(trail, "modulate:a", 0.0, 0.18)
+	tween.chain().tween_callback(_on_bullet_arrive.bind(bullet, trail))
 
-func _on_bullet_arrive(bullet: ColorRect) -> void:
+func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect) -> void:
 	bullet.queue_free()
+	trail.queue_free()
 	if not is_instance_valid(_current_target) or _current_hotspot.is_empty():
 		return
 
-	# 击中假矛盾 → 扣血
+	# 击中假矛盾 → 扣血 + 错误对话 → 重启循环
 	if _current_hotspot.get("is_fake", false):
-		_current_target.play_hit_effect()
-		DebateManager.damage_hp(8)
-		_info_label.text = "这是假矛盾！-8 HP"
 		_selected_evidence_id = ""
-		_current_hotspot.clear()
-		if DebateManager.current_hp <= 0:
-			_complete_debate(false)
+		DebateManager.damage_hp(8)
+		_can_aim = false
+		var fail_text: String = _current_hotspot.get("fail_dialogue", "这不是真正的矛盾……")
+		await _show_fail_dialogue(fail_text)
+		_restart_debate_cycle()
 		return
 
 	# 击中真矛盾 → 检查证据
 	if _current_hotspot.get("is_real", false):
 		var required: String = _current_hotspot.get("required_evidence_id", "")
 		if _selected_evidence_id == required:
-			_current_target.play_hit_effect()
+			# 正确！→ BREAK特效 → 结束
+			_selected_evidence_id = ""
+			_can_aim = false
 			_real_contradiction_hit = true
 			DebateManager.heal_hp(5)
-			_info_label.text = "就是这个！！正确击破！"
-			_selected_evidence_id = ""
-			_current_hotspot.clear()
+			_current_target.queue_free()
+			_phrases.erase(_current_target)
+			await _show_break_effect()
 			_complete_debate(true)
+			return
 		else:
-			_current_target.play_miss_effect()
+			# 证据错误 → 错误对话 → 重启循环
+			_selected_evidence_id = ""
 			DebateManager.damage_hp(10)
-			_info_label.text = "证据不对！-10 HP"
-			if DebateManager.current_hp <= 0:
-				_complete_debate(false)
-		return
+			_can_aim = false
+			_current_target.play_miss_effect()
+			var fail_text: String = _current_hotspot.get("fail_dialogue", "这个证据不对！")
+			await _show_fail_dialogue(fail_text)
+			_restart_debate_cycle()
+			return
 
 	# 击中普通文字
 	DebateManager.damage_hp(3)
 	_info_label.text = "这不是矛盾！-3 HP"
+	_selected_evidence_id = ""
+
+func _show_fail_dialogue(text: String) -> void:
+	_bg.hide()
+	_crosshair.hide()
+	_info_label.text = ""
+	_speaker_label.text = ""
+	EventBus.dialogue_show.emit({"speaker": "naegi", "text": text, "camera": "closeup"})
+	await EventBus.dialogue_next
+	_bg.show()
+	_crosshair.show()
+
+func _restart_debate_cycle() -> void:
+	_spawn_index = 0
+	for p in _phrases:
+		if is_instance_valid(p):
+			p.queue_free()
+	_phrases.clear()
+	_can_aim = true
+	_info_label.text = "再仔细想想……瞄准句中亮色词语！"
+	_spawn_timer.start(0.5)
+
+func _show_break_effect() -> void:
+	# 屏幕碎裂特效 → BREAK文字
+	var flash := ColorRect.new()
+	flash.color = Color(1, 1, 1, 0.7)
+	flash.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
+	add_child(flash)
+	var t1 := create_tween()
+	t1.tween_property(flash, "color:a", 0.0, 0.3)
+	t1.tween_callback(flash.queue_free)
+
+	var break_label := Label.new()
+	break_label.text = "BREAK"
+	break_label.add_theme_font_size_override("font_size", 80)
+	break_label.add_theme_color_override("font_color", Color(1, 0.2, 0.2))
+	break_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	break_label.size = Vector2(400, 100)
+	break_label.position = Vector2(760, 440)
+	add_child(break_label)
+
+	# 碎片效果：多个小色块向外飞出
+	for i in range(12):
+		var shard := ColorRect.new()
+		shard.color = Color(randf(), randf(), randf(), 0.8)
+		shard.size = Vector2(randf_range(20, 60), randf_range(20, 60))
+		shard.position = break_label.position + Vector2(200, 50)
+		add_child(shard)
+		var angle := TAU * float(i) / 12.0
+		var end_pos := shard.position + Vector2(cos(angle) * 300, sin(angle) * 200)
+		var t2 := create_tween()
+		t2.tween_property(shard, "position", end_pos, 0.6)
+		t2.parallel().tween_property(shard, "modulate:a", 0.0, 0.6)
+		t2.tween_callback(shard.queue_free)
+
+	var t3 := create_tween()
+	t3.tween_property(break_label, "modulate:a", 1.0, 0.1)
+	t3.tween_property(break_label, "modulate:a", 0.5, 0.1)
+	t3.tween_property(break_label, "modulate:a", 1.0, 0.1)
+	t3.tween_interval(1.0)
+	t3.tween_property(break_label, "modulate:a", 0.0, 0.5)
+	t3.tween_callback(break_label.queue_free)
 	_selected_evidence_id = ""
 
 func _complete_debate(success: bool) -> void:

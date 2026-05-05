@@ -53,6 +53,7 @@ func start_debate(config: NonStopDebateConfig) -> void:
 	else:
 		_selected_evidence_id = ""
 	_info_label.text = "言弹: [%s] | Tab切换 | 左键发射 | 瞄准句中亮色词语" % _get_current_evidence_name()
+	_courtroom_ref = _find_courtroom()
 	_apply_camera_presets()
 	_start_spawning()
 	_start_noise()

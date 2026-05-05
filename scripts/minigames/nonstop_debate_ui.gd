@@ -259,21 +259,20 @@ func _get_current_evidence_name() -> String:
 	return "???"
 
 func _fire_evidence() -> void:
-	# 射击动画
 	var fire_pos := _crosshair.position
-	var bullet := ColorRect.new()
-	bullet.color = Color(0.3, 0.9, 1)
-	bullet.size = Vector2(12, 12)
-	bullet.position = fire_pos - Vector2(6, 6)
+	var ev_name := _get_current_evidence_name()
+
+	# 言弹文字从屏幕上方飞入
+	var bullet := Label.new()
+	bullet.text = ev_name
+	bullet.add_theme_font_size_override("font_size", 24)
+	bullet.add_theme_color_override("font_color", Color(0.3, 0.9, 1))
+	bullet.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	bullet.add_theme_constant_override("outline_size", 3)
+	bullet.position = Vector2(fire_pos.x - 80, -40)
 	add_child(bullet)
 
-	var trail := ColorRect.new()
-	trail.color = Color(0.2, 0.7, 1, 0.4)
-	trail.size = Vector2(8, 8)
-	trail.position = fire_pos - Vector2(4, 4)
-	add_child(trail)
-
-	# 检测击中目标
+	# 检测目标
 	var hit_hotspot: Dictionary = {}
 	var hit_phrase: FloatingPhrase
 	for phrase in _phrases:
@@ -289,18 +288,14 @@ func _fire_evidence() -> void:
 	if hit_phrase:
 		target_pos = hit_phrase.global_position + hit_phrase.size / 2
 	else:
-		target_pos = fire_pos + Vector2(200, 0)
+		target_pos = fire_pos
 
 	var tween := create_tween()
-	tween.set_parallel(true)
-	tween.tween_property(bullet, "position", target_pos, 0.15)
-	tween.tween_property(trail, "position", target_pos, 0.18)
-	tween.tween_property(trail, "modulate:a", 0.0, 0.18)
-	tween.chain().tween_callback(_on_bullet_arrive.bind(bullet, trail, hit_phrase, hit_hotspot))
+	tween.tween_property(bullet, "position", target_pos, 0.2).set_ease(Tween.EASE_IN)
+	tween.chain().tween_callback(_on_bullet_arrive.bind(bullet, hit_phrase, hit_hotspot))
 
-func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect, phrase: FloatingPhrase, hotspot: Dictionary) -> void:
+func _on_bullet_arrive(bullet: Label, phrase: FloatingPhrase, hotspot: Dictionary) -> void:
 	bullet.queue_free()
-	trail.queue_free()
 
 	if not is_instance_valid(phrase) or hotspot.is_empty():
 		_info_label.text = "没有击中任何矛盾……"
@@ -308,7 +303,6 @@ func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect, phrase: FloatingPhra
 
 	# 击中假矛盾 → 扣血 + 错误对话 → 重启循环
 	if hotspot.get("is_fake", false):
-		_selected_evidence_id = ""
 		DebateManager.damage_hp(8)
 		_can_aim = false
 		var fail_text: String = hotspot.get("fail_dialogue", "这不是真正的矛盾……")
@@ -320,7 +314,6 @@ func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect, phrase: FloatingPhra
 	if hotspot.get("is_real", false):
 		var required: String = hotspot.get("required_evidence_id", "")
 		if _selected_evidence_id == required:
-			_selected_evidence_id = ""
 			_can_aim = false
 			_real_contradiction_hit = true
 			DebateManager.heal_hp(5)
@@ -330,7 +323,6 @@ func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect, phrase: FloatingPhra
 			_complete_debate(true)
 			return
 		else:
-			_selected_evidence_id = ""
 			DebateManager.damage_hp(10)
 			_can_aim = false
 			phrase.play_miss_effect()

@@ -14,6 +14,7 @@ var _dialogue_box: DialogueBox
 var _hp_bar: HPBar
 var _dialogue_box_added: bool = false
 var _hp_bar_added: bool = false
+var _script_triggered: bool = false
 
 func _ready() -> void:
 	_build_environment()
@@ -24,7 +25,16 @@ func _ready() -> void:
 	_assign_characters_to_podiums()
 	EventBus.trial_started.emit()
 	_add_test_evidence()
-	print("[CourtroomScene] 裁判场就绪。D=议论 R=反论 H=拼字 C=高潮 Space=对话 B=返回")
+	_auto_start_script()
+	print("[CourtroomScene] 裁判场就绪。D=议论 R=反论 H=拼字 C=高潮 B=返回")
+
+func _auto_start_script() -> void:
+	if _script_triggered:
+		return
+	_script_triggered = true
+	show_hp_bar()
+	await get_tree().create_timer(0.5).timeout
+	ScriptInterpreter.load_script("res://story/courtroom_test.script.json")
 
 func _add_test_evidence() -> void:
 	EvidenceManager.add_evidence({
@@ -46,9 +56,6 @@ func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
 		if event.keycode == KEY_B and event.pressed:
 			SceneManager.load_scene("main")
-		if event.keycode == KEY_SPACE and event.pressed:
-			show_hp_bar()
-			ScriptInterpreter.load_script("res://story/courtroom_test.script.json")
 		if event.keycode == KEY_D and event.pressed:
 			show_hp_bar()
 			EventBus.start_nonstop_debate.emit("debate_test_01")

@@ -13,17 +13,14 @@ var _spawn_index: int = 0
 var _contradiction_hit_count: int = 0
 var _total_contradictions: int = 0
 var _real_contradiction_hit: bool = false
-var _is_evidence_ring_open: bool = false
 var _selected_evidence_id: String = ""
-var _current_target: FloatingPhrase
-var _current_hotspot: Dictionary = {}
+var _current_evidence_list: Array[Dictionary] = []
+var _current_evidence_index: int = 0
 var _can_aim: bool = false
 
 # UI elements
 var _bg: ColorRect
 var _crosshair: Control
-var _ring_container: Control
-var _ring_buttons: Array[Button] = []
 var _hp_label: Label
 var _info_label: Label
 var _speaker_label: Label
@@ -44,8 +41,13 @@ func start_debate(config: NonStopDebateConfig) -> void:
 	_clear_old_phrases()
 	_total_contradictions = _count_contradictions()
 	_can_aim = true
-	_info_label.text = "瞄准句中亮色词语！金色=真矛盾 橙色=假矛盾 Tab选言弹发射"
-	_courtroom_ref = _find_courtroom()
+	_current_evidence_list = EvidenceManager.get_all_evidence()
+	_current_evidence_index = 0
+	if _current_evidence_list.size() > 0:
+		_selected_evidence_id = _current_evidence_list[0].get("id", "")
+	else:
+		_selected_evidence_id = ""
+	_info_label.text = "言弹: [%s] | Tab切换 | 左键发射 | 瞄准句中亮色词语" % _get_current_evidence_name()
 	_apply_camera_presets()
 	_start_spawning()
 	_start_noise()
@@ -92,10 +94,6 @@ func _build_ui() -> void:
 	cv.size = Vector2(2, 30)
 	cv.position = Vector2(-1, -15)
 	_crosshair.add_child(cv)
-
-	_ring_container = Control.new()
-	_ring_container.hide()
-	add_child(_ring_container)
 
 	_info_label = Label.new()
 	_info_label.position = Vector2(30, 120)
@@ -243,60 +241,28 @@ func _spawn_noise() -> void:
 func _input(event: InputEvent) -> void:
 	if not _can_aim:
 		return
+	# Tab切换言弹
 	if event.is_action_pressed("open_evidence_ring"):
-		_toggle_evidence_ring()
+		_cycle_evidence()
 		return
-	var lmb: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
-	if not lmb:
+	# 左键发射
+	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		_fire_evidence()
+
+func _cycle_evidence() -> void:
+	if _current_evidence_list.is_empty():
 		return
-	# 始终尝试发射
-	_fire_evidence()
+	_current_evidence_index = (_current_evidence_index + 1) % _current_evidence_list.size()
+	_selected_evidence_id = _current_evidence_list[_current_evidence_index].get("id", "")
+	_info_label.text = "言弹: [%s] | Tab切换 | 左键发射" % _get_current_evidence_name()
 
-
-func _toggle_evidence_ring() -> void:
-	if _is_evidence_ring_open:
-		_close_evidence_ring()
-	else:
-		_open_evidence_ring()
-
-func _open_evidence_ring() -> void:
-	_is_evidence_ring_open = true
-	_clear_ring_buttons()
-	var evidence_list := EvidenceManager.get_all_evidence()
-	var radius := 120.0
-	var count := evidence_list.size()
-	for i in range(count):
-		var ev := evidence_list[i] as Dictionary
-		var angle := TAU * float(i) / float(count) - PI / 2
-		var btn := Button.new()
-		btn.text = str(ev.get("name", "???"))
-		btn.position = Vector2(cos(angle), sin(angle)) * radius - Vector2(60, 15)
-		btn.size = Vector2(120, 30)
-		btn.add_theme_font_size_override("font_size", 10)
-		btn.pressed.connect(_on_evidence_selected.bind(ev.get("id", "")))
-		_ring_container.add_child(btn)
-		_ring_buttons.append(btn)
-	_ring_container.position = _crosshair.position
-	_ring_container.show()
-
-func _close_evidence_ring() -> void:
-	_is_evidence_ring_open = false
-	_clear_ring_buttons()
-	_ring_container.hide()
-
-func _clear_ring_buttons() -> void:
-	for btn in _ring_buttons:
-		btn.queue_free()
-	_ring_buttons.clear()
-
-func _on_evidence_selected(ev_id: String) -> void:
-	_selected_evidence_id = ev_id
-	_close_evidence_ring()
-	_info_label.text = "言弹已选择: " + ev_id + " — 点击瞄准的黄色矛盾发言发射！"
-
-func _auto_select_evidence() -> void:
-	if not _current_hotspot.is_empty():
-		_selected_evidence_id = _current_hotspot.get("required_evidence_id", "")
+func _get_current_evidence_name() -> String:
+	if _current_evidence_list.is_empty():
+		return "无"
+	if _current_evidence_index < _current_evidence_list.size():
+		var nm: String = _current_evidence_list[_current_evidence_index].get("name", "")
+		return nm
+	return "???"
 
 func _fire_evidence() -> void:
 	# 射击动画
@@ -448,8 +414,6 @@ func _complete_debate(success: bool) -> void:
 	_noise_timer.stop()
 	_spawn_timer.stop()
 	_clear_old_phrases()
-	_clear_ring_buttons()
-	_ring_container.hide()
 	var tween := create_tween()
 	tween.tween_property(_bg, "color:a", 0.0, 0.5)
 	tween.tween_callback(queue_free)

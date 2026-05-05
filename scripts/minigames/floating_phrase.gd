@@ -32,11 +32,10 @@ func setup(data: DebatePhrase) -> void:
 	else:
 		_label.text = "[color=#DDDDDD]%s[/color]" % data.text
 
-	# Wait for label to calculate its content size
-	await get_tree().process_frame
-	_label.fit_content = true
-	bg.size = _label.size + Vector2(16, 10)
-	bg.position = Vector2(-8, -5)
+	bg.size = Vector2(900, 60)
+	bg.position = Vector2(0, 0)
+
+	self.size = Vector2(900, 60)
 
 	var angle := randf() * TAU
 	_direction = Vector2(cos(angle), sin(angle))

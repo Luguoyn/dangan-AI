@@ -148,7 +148,6 @@ func _build_camera() -> void:
 	_camera = CourtroomCamera.new()
 	_camera.name = "CourtroomCamera"
 	_camera.default_position = Vector3(0, 9, 14)
-	_camera.default_look_at = Vector3(0, 1.5, 0)
 	add_child(_camera)
 
 func _build_podiums() -> void:

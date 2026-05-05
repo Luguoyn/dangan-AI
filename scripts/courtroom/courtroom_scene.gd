@@ -26,7 +26,7 @@ func _ready() -> void:
 	EventBus.trial_started.emit()
 	_add_test_evidence()
 	_auto_start_script()
-	print("[CourtroomScene] 裁判场就绪。D=议论 R=反论 H=拼字 C=高潮 B=返回")
+	print("[CourtroomScene] 裁判场就绪。D=议论 R=反论 H=拼字 C=高潮 B=关闭小游戏 Esc=返回日常")
 
 func _auto_start_script() -> void:
 	if _script_triggered:
@@ -52,10 +52,14 @@ func _add_test_evidence() -> void:
 
 func _input(event: InputEvent) -> void:
 	if event is InputEventKey:
-		if event.keycode == KEY_B and event.pressed:
+		if event.keycode == KEY_ESCAPE and event.pressed:
 			if is_instance_valid(DebateManager._active_debate_ui):
 				DebateManager._active_debate_ui.queue_free()
 			SceneManager.load_scene("main")
+			return
+		if event.keycode == KEY_B and event.pressed:
+			if is_instance_valid(DebateManager._active_debate_ui):
+				DebateManager._active_debate_ui.queue_free()
 			return
 	if ScriptInterpreter.is_executing or ScriptInterpreter.is_waiting_input:
 		return

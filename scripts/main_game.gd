@@ -194,10 +194,16 @@ func _on_scene_changed(scene_id: String) -> void:
 				EventBus.dialogue_show.disconnect(_dialogue_box._on_dialogue_show)
 		if _choice_panel:
 			_choice_panel.hide()
+		if _screen_effects:
+			_screen_effects.hide()
+		if _world:
+			_world.hide()
 	else:
 		_ui_active = true
 		if _dialogue_box and not EventBus.dialogue_show.is_connected(_dialogue_box._on_dialogue_show):
 			EventBus.dialogue_show.connect(_dialogue_box._on_dialogue_show)
+		if _world:
+			_world.show()
 
 func _on_npc_interacted(char_id: String) -> void:
 	print("[NPC] 与 %s 对话" % char_id)

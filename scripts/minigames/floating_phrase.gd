@@ -12,17 +12,28 @@ var _screen_size: Vector2
 
 func setup(data: DebatePhrase) -> void:
 	phrase_data = data
+
+	var bg := ColorRect.new()
+	bg.color = Color(0, 0, 0, 0.5)
+	bg.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	add_child(bg)
+
 	_label = RichTextLabel.new()
 	_label.bbcode_enabled = true
 	_label.fit_content = true
 	_label.scroll_active = false
-	_label.add_theme_font_size_override("normal_font_size", 20)
+	_label.add_theme_font_size_override("normal_font_size", 26)
+	_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
+	_label.add_theme_constant_override("outline_size", 3)
 	add_child(_label)
 
 	if data.is_contradiction:
-		_label.text = "[color=yellow][wave amp=3 freq=2]%s[/wave][/color]" % data.text
+		_label.text = "[color=#FFDD44]【%s】[/color]" % data.text
 	else:
-		_label.text = "[color=#999999]%s[/color]" % data.text
+		_label.text = "[color=#CCCCCC]%s[/color]" % data.text
+
+	bg.size = _label.size + Vector2(12, 8)
+	bg.position = Vector2(-6, -4)
 
 	var angle := randf() * TAU
 	_direction = Vector2(cos(angle), sin(angle))

@@ -39,7 +39,11 @@ func setup(data: DebatePhrase) -> void:
 	for part in parts:
 		var label := Label.new()
 		label.text = part["text"]
+		var seg_w: float = label.get_minimum_size().x
+		if seg_w < 20:
+			seg_w = float(part["text"].length()) * 32.0
 		label.position = Vector2(x_pos, 18)
+		label.size = Vector2(seg_w, 40)
 		label.add_theme_font_size_override("font_size", 30)
 		label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 		label.add_theme_constant_override("outline_size", 4)
@@ -57,8 +61,7 @@ func setup(data: DebatePhrase) -> void:
 		# 记录该段的位置范围（相对于本Control）
 		var seg_w: float = label.get_minimum_size().x
 		if seg_w < 20:
-			# 使用粗略估算：中文字符~30px，英文~18px
-			seg_w = float(part["text"].length()) * 28.0
+			seg_w = float(part["text"].length()) * 32.0
 		if part["is_real"] or part["is_fake"]:
 			_hotspot_map[Vector2(x_pos, 0)] = {"x": x_pos, "w": seg_w, "part": part}
 

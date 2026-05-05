@@ -262,14 +262,15 @@ func _fire_evidence() -> void:
 	var fire_pos := _crosshair.position
 	var ev_name := _get_current_evidence_name()
 
-	# 言弹文字从屏幕上方飞入
+	# 言弹文字从屏幕右侧飞入（3D纵深感：初始大→缩小）
 	var bullet := Label.new()
 	bullet.text = ev_name
-	bullet.add_theme_font_size_override("font_size", 24)
+	bullet.add_theme_font_size_override("font_size", 48)
 	bullet.add_theme_color_override("font_color", Color(0.3, 0.9, 1))
 	bullet.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	bullet.add_theme_constant_override("outline_size", 3)
-	bullet.position = Vector2(fire_pos.x - 80, -40)
+	bullet.add_theme_constant_override("outline_size", 4)
+	bullet.position = Vector2(1920, fire_pos.y - 30)
+	bullet.scale = Vector2(2.0, 2.0)
 	add_child(bullet)
 
 	# 检测目标
@@ -291,7 +292,9 @@ func _fire_evidence() -> void:
 		target_pos = fire_pos
 
 	var tween := create_tween()
-	tween.tween_property(bullet, "position", target_pos, 0.2).set_ease(Tween.EASE_IN)
+	tween.set_parallel(true)
+	tween.tween_property(bullet, "position", target_pos, 0.25).set_ease(Tween.EASE_IN)
+	tween.tween_property(bullet, "scale", Vector2(0.8, 0.8), 0.25).set_ease(Tween.EASE_IN)
 	tween.chain().tween_callback(_on_bullet_arrive.bind(bullet, hit_phrase, hit_hotspot))
 
 func _on_bullet_arrive(bullet: Label, phrase: FloatingPhrase, hotspot: Dictionary) -> void:

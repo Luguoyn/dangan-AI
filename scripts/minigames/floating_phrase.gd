@@ -20,20 +20,23 @@ func setup(data: DebatePhrase) -> void:
 
 	_label = RichTextLabel.new()
 	_label.bbcode_enabled = true
-	_label.fit_content = true
 	_label.scroll_active = false
-	_label.add_theme_font_size_override("normal_font_size", 26)
-	_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.8))
-	_label.add_theme_constant_override("outline_size", 3)
+	_label.size = Vector2(900, 60)
+	_label.add_theme_font_size_override("normal_font_size", 28)
+	_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
+	_label.add_theme_constant_override("outline_size", 4)
 	add_child(_label)
 
 	if data.is_contradiction:
-		_label.text = "[color=#FFDD44]【%s】[/color]" % data.text
+		_label.text = "[color=#FFEE55]【%s】[/color]" % data.text
 	else:
-		_label.text = "[color=#CCCCCC]%s[/color]" % data.text
+		_label.text = "[color=#DDDDDD]%s[/color]" % data.text
 
-	bg.size = _label.size + Vector2(12, 8)
-	bg.position = Vector2(-6, -4)
+	# Wait for label to calculate its content size
+	await get_tree().process_frame
+	_label.fit_content = true
+	bg.size = _label.size + Vector2(16, 10)
+	bg.position = Vector2(-8, -5)
 
 	var angle := randf() * TAU
 	_direction = Vector2(cos(angle), sin(angle))
@@ -67,7 +70,7 @@ func get_required_evidence_id() -> String:
 
 func play_hit_effect() -> void:
 	if phrase_data.is_contradiction:
-		_label.text = "[color=red][shake rate=20 level=10]%s[/shake][/color]" % phrase_data.text
+		_label.text = "[color=red]%s[/color]" % phrase_data.text
 	var tween := create_tween()
 	tween.tween_property(self, "modulate:a", 0.0, 0.3)
 	tween.tween_callback(queue_free)

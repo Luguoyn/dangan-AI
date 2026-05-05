@@ -140,8 +140,24 @@ func _start_spawning() -> void:
 	_spawn_timer.start(0.5)
 
 func _spawn_next_phrase() -> void:
+	# 一轮发言结束 → 主角思考 → 重新循环
 	if _spawn_index >= _config.phrases.size():
+		if _real_contradiction_hit:
+			return
+		# 清除旧发言
+		for p in _phrases:
+			if is_instance_valid(p):
+				p.queue_free()
+		_phrases.clear()
+		# 主角总结思考
+		_highlight_debate_speaker("naegi")
+		_speaker_label.text = "▼ 思考中: 苗木诚"
+		_info_label.text = "大家都在说什么……真正的矛盾在哪里？"
+		# 暂停2秒后重新开始
+		_spawn_timer.start(2.0)
+		_spawn_index = 0
 		return
+
 	# 清除上一轮的发言
 	for p in _phrases:
 		if is_instance_valid(p):

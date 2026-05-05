@@ -107,20 +107,24 @@ func _process(delta: float) -> void:
 	position += _direction * phrase_data.speed * delta
 	_lifetime_left -= delta
 
-	# 边界检测，不超出屏幕
-	var margin := 10.0
-	if position.x < margin:
-		position.x = margin
-		_direction.x *= -1
-	if position.x + size.x > _screen_size.x - margin:
-		position.x = _screen_size.x - size.x - margin
-		_direction.x *= -1
-	if position.y < 100:
-		position.y = 100
-		_direction.y *= -1
-	if position.y + size.y > _screen_size.y - 180:
-		position.y = _screen_size.y - size.y - 180
-		_direction.y *= -1
+	# 强制约束在屏幕内
+	var margin_l := 5.0
+	var margin_r := _screen_size.x - size.x - 5.0
+	var margin_t := 100.0
+	var margin_b := _screen_size.y - size.y - 170.0
+
+	if position.x <= margin_l:
+		position.x = margin_l
+		_direction.x = absf(_direction.x)
+	if position.x >= margin_r:
+		position.x = margin_r
+		_direction.x = -absf(_direction.x)
+	if position.y <= margin_t:
+		position.y = margin_t
+		_direction.y = absf(_direction.y)
+	if position.y >= margin_b:
+		position.y = margin_b
+		_direction.y = -absf(_direction.y)
 
 	if _lifetime_left <= 0:
 		queue_free()

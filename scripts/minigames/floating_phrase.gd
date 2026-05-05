@@ -5,7 +5,7 @@ extends Control
 # ============================================================
 
 var phrase_data: DebatePhrase
-var _segments: Array[Control] = []
+var _segments: Array = []
 var _hotspot_map: Dictionary = {}
 var _direction: Vector2
 var _lifetime_left: float
@@ -80,7 +80,7 @@ func setup(data: DebatePhrase) -> void:
 		clampf(randf_range(140, _screen_size.y - 250), 100, _screen_size.y - size.y - 170)
 	)
 
-func _build_segments(text: String, hotspots: Array) -> Array[Dictionary]:
+func _build_segments(text: String, hotspots: Array) -> Array:
 	if hotspots.is_empty():
 		return [{"text": text, "is_real": false, "is_fake": false}]
 	var remaining := text

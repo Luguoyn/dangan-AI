@@ -1,11 +1,12 @@
-class_name DebatePhrase extends Resource
+class_name DebatePhrase
+extends Resource
 # ============================================================
 # Step 31: 单条辩论发言 Resource
 # ============================================================
 
 @export var text: String = ""
 @export var speaker_id: String = ""
-@export var hotspots: Array[Dictionary] = []
+@export var hotspots: Array = []
 @export var speed: float = 60.0
 @export var lifetime: float = 10.0
 @export var speak_duration: float = 3.0

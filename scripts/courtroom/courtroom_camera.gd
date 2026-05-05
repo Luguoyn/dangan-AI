@@ -26,6 +26,7 @@ var _tween_from_dist: float = 3.0
 var _tween_to_dist: float = 3.0
 var _tween_from_height: float = 1.8
 var _tween_to_height: float = 1.8
+var _tween_look_target: Vector3
 
 func _ready() -> void:
 	position = default_position
@@ -49,7 +50,16 @@ func move_to_podium(podium_index: int, shot_type: String = "closeup") -> void:
 	var angle := TAU * float(podium_index) / 16.0
 	var dist: float = 3.0
 	var height: float = 1.8
-	match shot_type: "closeup": dist = 3.0; height = 1.8; "medium": dist = 5.0; height = 2.5; "wide": dist = 8.0; height = 4.0
+	match shot_type:
+		"closeup":
+			dist = 3.0
+			height = 1.8
+		"medium":
+			dist = 5.0
+			height = 2.5
+		"wide":
+			dist = 8.0
+			height = 4.0
 
 	if _last_podium >= 0 and _last_podium != podium_index:
 		match _transition_style:
@@ -130,14 +140,17 @@ func shake(intensity: float, duration: float) -> void:
 
 func _animate_to(target_pos: Vector3, look_target: Vector3, duration: float) -> void:
 	_is_animating = true
+	_tween_look_target = look_target
 	var tween := create_tween()
 	tween.set_parallel(true)
 	tween.tween_property(self, "position", target_pos, duration).set_ease(Tween.EASE_IN_OUT)
-	tween.tween_method(_look_at_target.bind(look_target), 0.0, 1.0, duration)
+	tween.tween_method(_tween_look, 0.0, 1.0, duration)
 	tween.chain().tween_callback(_on_anim_done)
 
+func _tween_look(_t: float) -> void:
+	look_at(_tween_look_target)
+
 func _on_anim_done() -> void: _is_animating = false
-func _look_at_target(_t: float, target: Vector3) -> void: look_at(target)
 func _look_at_podium(angle: float) -> Vector3: return Vector3(cos(angle) * 6.0, 1.5, sin(angle) * 6.0)
 func _angle_to_pos(angle: float, dist: float, height: float) -> Vector3:
 	var px := cos(angle) * 6.0; var pz := sin(angle) * 6.0

@@ -64,14 +64,9 @@ func _input(event: InputEvent) -> void:
 
 func _build_environment() -> void:
 	var env := WorldEnvironment.new()
-	var sky := PanoramaSkyMaterial.new()
-	sky.sky_top_color = Color(0.02, 0.01, 0.05)
-	sky.sky_horizon_color = Color(0.05, 0.02, 0.08)
-	sky.ground_bottom_color = Color(0.08, 0.03, 0.1)
 	env.environment = Environment.new()
-	env.environment.sky = Sky.new()
-	env.environment.sky.sky_material = sky
-	env.environment.background_mode = Environment.BG_SKY
+	env.environment.background_mode = Environment.BG_COLOR
+	env.environment.background_color = Color(0.02, 0.01, 0.05)
 	env.environment.ambient_light_color = Color(0.15, 0.1, 0.2)
 	env.environment.ambient_light_energy = 0.5
 	env.environment.fog_enabled = true

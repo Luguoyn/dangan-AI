@@ -240,26 +240,18 @@ func _spawn_noise() -> void:
 	_phrase_container.add_child(fp)
 	_noise_phrases.append(fp)
 
-func _unhandled_input(event: InputEvent) -> void:
+func _input(event: InputEvent) -> void:
 	if not _can_aim:
 		return
 	if event.is_action_pressed("open_evidence_ring"):
 		_toggle_evidence_ring()
-		get_viewport().set_input_as_handled()
 		return
-	if _is_evidence_ring_open:
+	var lmb: bool = event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed
+	if not lmb:
 		return
-	var should_fire := false
-	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
-		should_fire = true
-	elif event.is_action_pressed("fire_evidence"):
-		should_fire = true
-	if should_fire:
-		if _current_target and not _current_hotspot.is_empty():
-			if _selected_evidence_id == "":
-				_auto_select_evidence()
-			_fire_evidence()
-			get_viewport().set_input_as_handled()
+	# 始终尝试发射
+	_fire_evidence()
+
 
 func _toggle_evidence_ring() -> void:
 	if _is_evidence_ring_open:
@@ -307,74 +299,87 @@ func _auto_select_evidence() -> void:
 		_selected_evidence_id = _current_hotspot.get("required_evidence_id", "")
 
 func _fire_evidence() -> void:
-	if not _current_target:
-		return
-	# 射击动画：子弹+拖尾
+	# 射击动画
+	var fire_pos := _crosshair.position
 	var bullet := ColorRect.new()
 	bullet.color = Color(0.3, 0.9, 1)
-	bullet.size = Vector2(10, 10)
-	bullet.position = _crosshair.position - Vector2(5, 5)
+	bullet.size = Vector2(12, 12)
+	bullet.position = fire_pos - Vector2(6, 6)
 	add_child(bullet)
 
 	var trail := ColorRect.new()
-	trail.color = Color(0.2, 0.7, 1, 0.5)
-	trail.size = Vector2(6, 6)
-	trail.position = bullet.position
+	trail.color = Color(0.2, 0.7, 1, 0.4)
+	trail.size = Vector2(8, 8)
+	trail.position = fire_pos - Vector2(4, 4)
 	add_child(trail)
 
-	var target_pos := _current_target.global_position + _current_target.size / 2
+	# 检测击中目标
+	var hit_hotspot: Dictionary = {}
+	var hit_phrase: FloatingPhrase
+	for phrase in _phrases:
+		if not is_instance_valid(phrase):
+			continue
+		var hs := phrase.find_hotspot_at(fire_pos)
+		if not hs.is_empty():
+			hit_hotspot = hs
+			hit_phrase = phrase
+			break
+
+	var target_pos: Vector2
+	if hit_phrase:
+		target_pos = hit_phrase.global_position + hit_phrase.size / 2
+	else:
+		target_pos = fire_pos + Vector2(200, 0)
+
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(bullet, "position", target_pos, 0.15).set_ease(Tween.EASE_IN)
-	tween.tween_property(trail, "position", target_pos, 0.18).set_ease(Tween.EASE_IN)
+	tween.tween_property(bullet, "position", target_pos, 0.15)
+	tween.tween_property(trail, "position", target_pos, 0.18)
 	tween.tween_property(trail, "modulate:a", 0.0, 0.18)
-	tween.chain().tween_callback(_on_bullet_arrive.bind(bullet, trail))
+	tween.chain().tween_callback(_on_bullet_arrive.bind(bullet, trail, hit_phrase, hit_hotspot))
 
-func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect) -> void:
+func _on_bullet_arrive(bullet: ColorRect, trail: ColorRect, phrase: FloatingPhrase, hotspot: Dictionary) -> void:
 	bullet.queue_free()
 	trail.queue_free()
-	if not is_instance_valid(_current_target) or _current_hotspot.is_empty():
+
+	if not is_instance_valid(phrase) or hotspot.is_empty():
+		_info_label.text = "没有击中任何矛盾……"
 		return
 
 	# 击中假矛盾 → 扣血 + 错误对话 → 重启循环
-	if _current_hotspot.get("is_fake", false):
+	if hotspot.get("is_fake", false):
 		_selected_evidence_id = ""
 		DebateManager.damage_hp(8)
 		_can_aim = false
-		var fail_text: String = _current_hotspot.get("fail_dialogue", "这不是真正的矛盾……")
+		var fail_text: String = hotspot.get("fail_dialogue", "这不是真正的矛盾……")
 		await _show_fail_dialogue(fail_text)
 		_restart_debate_cycle()
 		return
 
 	# 击中真矛盾 → 检查证据
-	if _current_hotspot.get("is_real", false):
-		var required: String = _current_hotspot.get("required_evidence_id", "")
+	if hotspot.get("is_real", false):
+		var required: String = hotspot.get("required_evidence_id", "")
 		if _selected_evidence_id == required:
-			# 正确！→ BREAK特效 → 结束
 			_selected_evidence_id = ""
 			_can_aim = false
 			_real_contradiction_hit = true
 			DebateManager.heal_hp(5)
-			_current_target.queue_free()
-			_phrases.erase(_current_target)
+			phrase.queue_free()
+			_phrases.erase(phrase)
 			await _show_break_effect()
 			_complete_debate(true)
 			return
 		else:
-			# 证据错误 → 错误对话 → 重启循环
 			_selected_evidence_id = ""
 			DebateManager.damage_hp(10)
 			_can_aim = false
-			_current_target.play_miss_effect()
-			var fail_text: String = _current_hotspot.get("fail_dialogue", "这个证据不对！")
+			phrase.play_miss_effect()
+			var fail_text: String = hotspot.get("fail_dialogue", "这个证据不对！")
 			await _show_fail_dialogue(fail_text)
 			_restart_debate_cycle()
 			return
 
-	# 击中普通文字
-	DebateManager.damage_hp(3)
-	_info_label.text = "这不是矛盾！-3 HP"
-	_selected_evidence_id = ""
+	_info_label.text = "这不是矛盾点……"
 
 func _show_fail_dialogue(text: String) -> void:
 	_bg.hide()

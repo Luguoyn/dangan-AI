@@ -6,6 +6,7 @@ extends Control
 
 var phrase_data: DebatePhrase
 var _label: RichTextLabel
+var _speaker_tag: Label
 var _direction: Vector2
 var _lifetime_left: float
 var _screen_size: Vector2
@@ -22,20 +23,33 @@ func setup(data: DebatePhrase) -> void:
 	_label.bbcode_enabled = true
 	_label.scroll_active = false
 	_label.size = Vector2(900, 60)
+	_label.position = Vector2(0, 16)
 	_label.add_theme_font_size_override("normal_font_size", 28)
 	_label.add_theme_color_override("font_outline_color", Color(0, 0, 0, 0.9))
 	_label.add_theme_constant_override("outline_size", 4)
 	add_child(_label)
+
+	_speaker_tag = Label.new()
+	_speaker_tag.position = Vector2(4, 0)
+	_speaker_tag.add_theme_font_size_override("font_size", 14)
+	_speaker_tag.add_theme_color_override("font_color", Color(0.6, 0.8, 1))
+	add_child(_speaker_tag)
+
+	if data.speaker_id != "":
+		var cd := CharacterManager.get_character(data.speaker_id)
+		_speaker_tag.text = cd.display_name if cd else data.speaker_id
+	else:
+		_speaker_tag.hide()
 
 	if data.is_contradiction:
 		_label.text = "[color=#FFEE55]【%s】[/color]" % data.text
 	else:
 		_label.text = "[color=#DDDDDD]%s[/color]" % data.text
 
-	bg.size = Vector2(900, 60)
+	bg.size = Vector2(900, 76)
 	bg.position = Vector2(0, 0)
 
-	self.size = Vector2(900, 60)
+	self.size = Vector2(900, 76)
 
 	var angle := randf() * TAU
 	_direction = Vector2(cos(angle), sin(angle))

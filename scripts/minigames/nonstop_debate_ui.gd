@@ -24,9 +24,11 @@ var _ring_container: Control
 var _ring_buttons: Array[Button] = []
 var _hp_label: Label
 var _info_label: Label
+var _speaker_label: Label
 var _phrase_container: Control
 var _noise_timer: Timer
 var _spawn_timer: Timer
+var _courtroom_ref: Node
 
 func _ready() -> void:
 	_build_ui()
@@ -40,8 +42,17 @@ func start_debate(config: NonStopDebateConfig) -> void:
 	_total_contradictions = _count_contradictions()
 	_can_aim = true
 	_info_label.text = "找到矛盾！瞄准黄色发言，按Tab选择言弹发射！"
+	_courtroom_ref = _find_courtroom()
 	_start_spawning()
 	_start_noise()
+
+func _find_courtroom() -> Node:
+	var tree := get_tree()
+	if tree:
+		var scene := tree.current_scene
+		if scene and scene is CourtroomScene:
+			return scene
+	return null
 
 func _build_ui() -> void:
 	_bg = ColorRect.new()
@@ -78,6 +89,12 @@ func _build_ui() -> void:
 	_info_label.add_theme_font_size_override("font_size", 18)
 	_info_label.add_theme_color_override("font_color", Color(1, 0.9, 0.4))
 	add_child(_info_label)
+
+	_speaker_label = Label.new()
+	_speaker_label.position = Vector2(30, 150)
+	_speaker_label.add_theme_font_size_override("font_size", 22)
+	_speaker_label.add_theme_color_override("font_color", Color(1, 1, 1))
+	add_child(_speaker_label)
 
 	_hp_label = Label.new()
 	_hp_label.position = Vector2(30, 60)
@@ -122,12 +139,27 @@ func _spawn_next_phrase() -> void:
 		return
 	var dp := _config.phrases[_spawn_index]
 	_spawn_index += 1
+
+	# 高亮发言角色 + 摄像机 + 显示名字
+	_highlight_debate_speaker(dp.speaker_id)
+
 	var phrase := FloatingPhrase.new()
 	phrase.setup(dp)
 	_phrase_container.add_child(phrase)
 	_phrases.append(phrase)
 	if _spawn_index < _config.phrases.size():
 		_spawn_timer.start(_config.spawn_interval)
+
+func _highlight_debate_speaker(speaker_id: String) -> void:
+	if speaker_id == "":
+		return
+	var cd := CharacterManager.get_character(speaker_id)
+	var name_str := cd.display_name if cd else speaker_id
+	_speaker_label.text = "▼ 发言中: %s" % name_str
+
+	if _courtroom_ref:
+		_courtroom_ref.clear_highlights()
+		_courtroom_ref.move_camera_to_speaker(speaker_id, "closeup")
 
 func _start_noise() -> void:
 	if _config.noise_texts.size() > 0:

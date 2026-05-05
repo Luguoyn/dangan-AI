@@ -1,7 +1,6 @@
 extends Node
 # ============================================================
 # Step 29: DebateManager — 辩论总控 (Autoload)
-# 裁判场状态、HP 系统、小游戏调度、难度配置
 # ============================================================
 
 signal minigame_requested(minigame_type: String, config_id: String)
@@ -11,6 +10,7 @@ var current_hp: int = 100
 var equipped_skills: Array = []
 var is_trial_active: bool = false
 var difficulty_config: Dictionary = {}
+var _active_debate_ui: Node
 
 func _ready() -> void:
 	_load_difficulty_config()
@@ -24,6 +24,46 @@ func _ready() -> void:
 	EventBus.start_rebuttal.connect(_on_start_rebuttal)
 	EventBus.start_hangman.connect(_on_start_hangman)
 	EventBus.start_climax_inference.connect(_on_start_climax)
+
+func _on_start_nonstop_debate(config_id: String) -> void:
+	if is_instance_valid(_active_debate_ui):
+		return
+	var path := "res://resources/debate_configs/" + config_id + ".json"
+	if not FileAccess.file_exists(path):
+		push_error("DebateManager: Config not found: " + path)
+		return
+	var file := FileAccess.open(path, FileAccess.READ)
+	var text := file.get_as_text()
+	file.close()
+	var data: Variant = JSON.parse_string(text)
+	var config := NonStopDebateConfig.new()
+	config.load_from_dict(data)
+	var ui := NonStopDebateUI.new()
+	_active_debate_ui = ui
+	ui.debate_finished.connect(func(_s): _active_debate_ui = null)
+	get_tree().root.add_child(ui)
+	ui.start_debate(config)
+
+func _on_start_rebuttal(config_id: String) -> void:
+	if is_instance_valid(_active_debate_ui):
+		return
+	var path := "res://resources/debate_configs/rebuttal/" + config_id + ".json"
+	if not FileAccess.file_exists(path):
+		path = "res://resources/debate_configs/" + config_id + ".json"
+	if not FileAccess.file_exists(path):
+		push_error("DebateManager: Config not found: " + path)
+		return
+	var file := FileAccess.open(path, FileAccess.READ)
+	var text := file.get_as_text()
+	file.close()
+	var data: Variant = JSON.parse_string(text)
+	var config := RebuttalConfig.new()
+	config.load_from_dict(data)
+	var ui := RebuttalUI.new()
+	_active_debate_ui = ui
+	ui.rebuttal_finished.connect(func(_s): _active_debate_ui = null)
+	get_tree().root.add_child(ui)
+	ui.start_rebuttal(config)
 
 func _on_start_hangman(config_id: String, mode: String) -> void:
 	if is_instance_valid(_active_debate_ui):
@@ -61,24 +101,9 @@ func _on_start_climax(config_id: String) -> void:
 
 func _load_difficulty_config() -> void:
 	difficulty_config = {
-		"kind": {
-			"max_hp": 120, "hp_damage_mult": 0.7, "hp_heal_amount": 8,
-			"evidence_ring_time": 0.6, "nonstop_yellow_linger": 12.0,
-			"hangman_time_bonus": 10.0, "rebuttal_judge_window": 80,
-			"climax_time_limit": 75.0
-		},
-		"normal": {
-			"max_hp": 100, "hp_damage_mult": 1.0, "hp_heal_amount": 5,
-			"evidence_ring_time": 0.4, "nonstop_yellow_linger": 8.0,
-			"hangman_time_bonus": 0.0, "rebuttal_judge_window": 50,
-			"climax_time_limit": 60.0
-		},
-		"mean": {
-			"max_hp": 80, "hp_damage_mult": 1.5, "hp_heal_amount": 3,
-			"evidence_ring_time": 0.2, "nonstop_yellow_linger": 5.0,
-			"hangman_time_bonus": -5.0, "rebuttal_judge_window": 30,
-			"climax_time_limit": 45.0
-		}
+		"kind": {"max_hp": 120, "hp_damage_mult": 0.7, "hp_heal_amount": 8, "rebuttal_judge_window": 80},
+		"normal": {"max_hp": 100, "hp_damage_mult": 1.0, "hp_heal_amount": 5, "rebuttal_judge_window": 50},
+		"mean": {"max_hp": 80, "hp_damage_mult": 1.5, "hp_heal_amount": 3, "rebuttal_judge_window": 30}
 	}
 
 func _on_trial_started() -> void:
@@ -112,18 +137,14 @@ func damage_hp(amount: int) -> void:
 func heal_hp(amount: int) -> void:
 	if not is_trial_active:
 		return
-	var diff_config := _get_current_diff()
-	var heal := maxi(1, amount)
-	current_hp = mini(max_hp, current_hp + heal)
+	current_hp = mini(max_hp, current_hp + maxi(1, amount))
 	EventBus.hp_changed.emit(current_hp, max_hp)
 
 func get_diff_param(key: String, default: Variant = null) -> Variant:
-	var diff_config := _get_current_diff()
-	return diff_config.get(key, default)
+	return _get_current_diff().get(key, default)
 
 func _get_current_diff() -> Dictionary:
-	var diff: String = GameManager.get_difficulty()
-	return difficulty_config.get(diff, difficulty_config["normal"])
+	return difficulty_config.get(GameManager.get_difficulty(), difficulty_config["normal"])
 
 func equip_skill(skill_id: String) -> void:
 	if skill_id not in equipped_skills:

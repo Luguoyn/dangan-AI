@@ -240,24 +240,26 @@ func _spawn_noise() -> void:
 	_phrase_container.add_child(fp)
 	_noise_phrases.append(fp)
 
-func _input(event: InputEvent) -> void:
+func _unhandled_input(event: InputEvent) -> void:
 	if not _can_aim:
 		return
 	if event.is_action_pressed("open_evidence_ring"):
 		_toggle_evidence_ring()
+		get_viewport().set_input_as_handled()
 		return
 	if _is_evidence_ring_open:
 		return
-	# 鼠标左键或fire_evidence动作发射
 	var should_fire := false
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
 		should_fire = true
 	elif event.is_action_pressed("fire_evidence"):
 		should_fire = true
-	if should_fire and _current_target and not _current_hotspot.is_empty():
-		if _selected_evidence_id == "":
-			_auto_select_evidence()
-		_fire_evidence()
+	if should_fire:
+		if _current_target and not _current_hotspot.is_empty():
+			if _selected_evidence_id == "":
+				_auto_select_evidence()
+			_fire_evidence()
+			get_viewport().set_input_as_handled()
 
 func _toggle_evidence_ring() -> void:
 	if _is_evidence_ring_open:

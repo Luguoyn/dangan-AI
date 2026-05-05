@@ -53,7 +53,7 @@ func setup(data: DebatePhrase) -> void:
 		var seg := Control.new()
 		seg.mouse_filter = Control.MOUSE_FILTER_STOP
 		seg.add_child(label)
-		seg.size = label.size + Vector2(0, 4)
+		seg.size = label.size
 		seg.position = Vector2(x_pos, 16)
 		add_child(seg)
 

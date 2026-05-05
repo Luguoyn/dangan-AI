@@ -42,7 +42,10 @@ func setup(data: DebatePhrase) -> void:
 		_speaker_tag.hide()
 
 	if data.is_contradiction:
-		_label.text = "[color=#FFEE55]【%s】[/color]" % data.text
+		if data.is_real_contradiction:
+			_label.text = "[color=#FFEE55]【%s】[/color]" % data.text
+		else:
+			_label.text = "[color=#DDAA44]%s[/color]" % data.text
 	else:
 		_label.text = "[color=#DDDDDD]%s[/color]" % data.text
 
@@ -77,6 +80,9 @@ func get_text_rect() -> Rect2:
 
 func is_contradiction() -> bool:
 	return phrase_data.is_contradiction
+
+func is_real_contradiction() -> bool:
+	return phrase_data.is_real_contradiction
 
 func get_required_evidence_id() -> String:
 	return phrase_data.required_evidence_id

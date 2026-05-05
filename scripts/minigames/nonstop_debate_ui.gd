@@ -12,6 +12,7 @@ var _noise_phrases: Array[FloatingPhrase] = []
 var _spawn_index: int = 0
 var _contradiction_hit_count: int = 0
 var _total_contradictions: int = 0
+var _real_contradiction_hit: bool = false
 var _is_evidence_ring_open: bool = false
 var _selected_evidence_id: String = ""
 var _current_target: FloatingPhrase
@@ -37,11 +38,12 @@ func start_debate(config: NonStopDebateConfig) -> void:
 	_config = config
 	_spawn_index = 0
 	_contradiction_hit_count = 0
+	_real_contradiction_hit = false
 	_phrases.clear()
 	_clear_old_phrases()
 	_total_contradictions = _count_contradictions()
 	_can_aim = true
-	_info_label.text = "找到矛盾！瞄准黄色发言，按Tab选择言弹发射！"
+	_info_label.text = "找到真正的矛盾！金色闪光=真矛盾 暗黄=假矛盾 灰=普通发言"
 	_courtroom_ref = _find_courtroom()
 	_start_spawning()
 	_start_noise()
@@ -125,30 +127,39 @@ func _check_phrase_hover() -> void:
 	_crosshair.modulate = Color(0, 1, 1, 0.7)
 	for phrase in _phrases:
 		if is_instance_valid(phrase) and phrase.has_point(_crosshair.position):
-			if phrase.is_contradiction():
+			if phrase.is_real_contradiction():
 				_current_target = phrase
-				_crosshair.modulate = Color(1, 0.8, 0.2, 1.0)
+				_crosshair.modulate = Color(1, 0.9, 0.2, 1.0)
+			elif phrase.is_contradiction():
+				_current_target = phrase
+				_crosshair.modulate = Color(1, 0.6, 0.1, 0.9)
 			else:
 				_crosshair.modulate = Color(0.5, 0.5, 0.5, 0.5)
 
 func _start_spawning() -> void:
-	_spawn_timer.start(0.3)
+	_spawn_timer.start(0.5)
 
 func _spawn_next_phrase() -> void:
 	if _spawn_index >= _config.phrases.size():
 		return
+	# 清除上一轮的发言
+	for p in _phrases:
+		if is_instance_valid(p):
+			p.queue_free()
+	_phrases.clear()
+
 	var dp := _config.phrases[_spawn_index]
 	_spawn_index += 1
 
-	# 高亮发言角色 + 摄像机 + 显示名字
 	_highlight_debate_speaker(dp.speaker_id)
 
 	var phrase := FloatingPhrase.new()
 	phrase.setup(dp)
 	_phrase_container.add_child(phrase)
 	_phrases.append(phrase)
-	if _spawn_index < _config.phrases.size():
-		_spawn_timer.start(_config.spawn_interval)
+
+	# 等待发言时间后进入下一轮
+	_spawn_timer.start(dp.speak_duration)
 
 func _highlight_debate_speaker(speaker_id: String) -> void:
 	if speaker_id == "":
@@ -254,21 +265,39 @@ func _on_bullet_arrive(bullet: ColorRect) -> void:
 	bullet.queue_free()
 	if not is_instance_valid(_current_target):
 		return
-	var required := _current_target.get_required_evidence_id()
-	if _selected_evidence_id == required:
+
+	# 击中假矛盾 → 扣血
+	if _current_target.is_contradiction() and not _current_target.is_real_contradiction():
 		_current_target.play_hit_effect()
-		_contradiction_hit_count += 1
-		DebateManager.heal_hp(5)
-		_info_label.text = "就是这个！！（已击破 %d/%d）" % [_contradiction_hit_count, _total_contradictions]
+		DebateManager.damage_hp(8)
+		_info_label.text = "这是假矛盾！-8 HP"
 		_selected_evidence_id = ""
-		if _contradiction_hit_count >= _total_contradictions:
-			_complete_debate(true)
-	else:
-		_current_target.play_miss_effect()
-		DebateManager.damage_hp(10)
-		_info_label.text = "不对……选错了！-10 HP"
 		if DebateManager.current_hp <= 0:
 			_complete_debate(false)
+		return
+
+	# 击中真矛盾 → 检查证据
+	if _current_target.is_real_contradiction():
+		var required := _current_target.get_required_evidence_id()
+		if _selected_evidence_id == required:
+			_current_target.play_hit_effect()
+			_real_contradiction_hit = true
+			DebateManager.heal_hp(5)
+			_info_label.text = "就是这个！！正确击破！"
+			_selected_evidence_id = ""
+			_complete_debate(true)
+		else:
+			_current_target.play_miss_effect()
+			DebateManager.damage_hp(10)
+			_info_label.text = "证据不对！-10 HP"
+			if DebateManager.current_hp <= 0:
+				_complete_debate(false)
+		return
+
+	# 击中普通发言 → 扣一点HP（浪费子弹）
+	DebateManager.damage_hp(3)
+	_info_label.text = "这不是矛盾发言！-3 HP"
+	_selected_evidence_id = ""
 
 func _complete_debate(success: bool) -> void:
 	_can_aim = false

@@ -50,20 +50,28 @@ func move_to_podium(podium_index: int, shot_type: String = "closeup") -> void:
 func _rotate_around_center(from_angle: float, to_angle: float, from_dist: float, to_dist: float, to_height: float) -> void:
 	_is_animating = true
 	var duration := 0.6
-	var tween := create_tween()
 
-	# 绕中心旋转：只改变角度，dist和height在旋转中渐变
+	# 临时存储旋转参数
+	var _rot_start_angle := from_angle
+	var _rot_end_angle := to_angle
+	var _rot_start_dist := from_dist
+	var _rot_end_dist := to_dist
+	var _rot_start_h := _target_height
+	var _rot_end_h := to_height
+
+	var tween := create_tween()
 	tween.tween_method(
-		func(t: float):
-			var a := lerp_angle(from_angle, to_angle, t)
-			var d := lerpf(from_dist, to_dist, t)
-			var h := lerpf(_target_height, to_height, t)
-			position = _angle_to_pos(a, d, h)
-			look_at(_look_at_podium(a))
-		,
+		_apply_rotation.bind(_rot_start_angle, _rot_end_angle, _rot_start_dist, _rot_end_dist, _rot_start_h, _rot_end_h),
 		0.0, 1.0, duration
 	).set_ease(Tween.EASE_IN_OUT)
-	tween.chain().tween_callback(func(): _is_animating = false)
+	tween.chain().tween_callback(_on_anim_done)
+
+func _apply_rotation(t: float, from_a: float, to_a: float, from_d: float, to_d: float, from_h: float, to_h: float) -> void:
+	var a := lerp_angle(from_a, to_a, t)
+	var d := lerpf(from_d, to_d, t)
+	var h := lerpf(from_h, to_h, t)
+	position = _angle_to_pos(a, d, h)
+	look_at(_look_at_podium(a))
 
 func move_to_center() -> void:
 	_animate_to(overview_position, Vector3(0, 1.5, 0), 0.5)
@@ -93,7 +101,10 @@ func _animate_to(target_pos: Vector3, look_target: Vector3, duration: float = 0.
 	tween.set_parallel(true)
 	tween.tween_property(self, "position", target_pos, duration).set_ease(Tween.EASE_IN_OUT)
 	tween.tween_method(_look_at_target.bind(look_target), 0.0, 1.0, duration)
-	tween.chain().tween_callback(func(): _is_animating = false)
+	tween.chain().tween_callback(_on_anim_done)
+
+func _on_anim_done() -> void:
+	_is_animating = false
 
 func _look_at_target(_t: float, target: Vector3) -> void:
 	look_at(target)

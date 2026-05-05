@@ -9,6 +9,8 @@ class_name NonStopDebateConfig extends Resource
 @export var spawn_interval: float = 1.8
 @export var require_sequential: bool = true
 @export var available_evidence_ids: Array[String] = []
+@export var camera_transition: String = "rotate"
+@export var camera_lock: String = "drift"
 
 func load_from_dict(data: Dictionary) -> void:
 	config_id = data.get("config_id", "")
@@ -16,6 +18,8 @@ func load_from_dict(data: Dictionary) -> void:
 	require_sequential = data.get("require_sequential", true)
 	available_evidence_ids.assign(data.get("available_evidence_ids", []))
 	noise_texts.assign(data.get("noise_texts", []))
+	camera_transition = data.get("camera_transition", "rotate")
+	camera_lock = data.get("camera_lock", "drift")
 	phrases.clear()
 	for p in data.get("phrases", []):
 		var dp := DebatePhrase.new()

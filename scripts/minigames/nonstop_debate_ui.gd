@@ -46,6 +46,7 @@ func start_debate(config: NonStopDebateConfig) -> void:
 	_can_aim = true
 	_info_label.text = "瞄准句中亮色词语！金色=真矛盾 橙色=假矛盾 Tab选言弹发射"
 	_courtroom_ref = _find_courtroom()
+	_apply_camera_presets()
 	_start_spawning()
 	_start_noise()
 
@@ -56,6 +57,15 @@ func _find_courtroom() -> Node:
 		if scene and scene is CourtroomScene:
 			return scene
 	return null
+
+func _apply_camera_presets() -> void:
+	if not _courtroom_ref:
+		return
+	var cam := _courtroom_ref.get_camera()
+	if not cam:
+		return
+	cam.set_transition_style(_config.camera_transition)
+	cam.set_lock_style(_config.camera_lock)
 
 func _build_ui() -> void:
 	_bg = ColorRect.new()

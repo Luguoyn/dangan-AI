@@ -1,5 +1,7 @@
 {
   "config_id": "debate_test_01",
+  "camera_transition": "rotate",
+  "camera_lock": "drift",
   "noise_texts": [
     "确实如此呢……", "好像有道理……", "让我再想想……", "嗯嗯，继续说……",
     "是这样吗……", "不对不对……", "你说的也有道理……"

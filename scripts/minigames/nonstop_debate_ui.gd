@@ -149,12 +149,20 @@ func _spawn_next_phrase() -> void:
 			if is_instance_valid(p):
 				p.queue_free()
 		_phrases.clear()
-		# 主角总结思考
-		_highlight_debate_speaker("naegi")
-		_speaker_label.text = "▼ 思考中: 苗木诚"
-		_info_label.text = "大家都在说什么……真正的矛盾在哪里？"
-		# 暂停2秒后重新开始
-		_spawn_timer.start(2.0)
+		# 主角总结思考 — 复用裁判场对话框
+		_speaker_label.text = ""
+		_info_label.text = ""
+		_bg.hide()
+		_crosshair.hide()
+		EventBus.dialogue_show.emit({
+			"speaker": "naegi",
+			"text": "大家都在说什么……真正的矛盾到底在哪里？我得冷静下来好好想想……",
+			"camera": "closeup"
+		})
+		await EventBus.dialogue_next
+		_bg.show()
+		_crosshair.show()
+		_spawn_timer.start(0.5)
 		_spawn_index = 0
 		return
 
@@ -187,6 +195,9 @@ func _highlight_debate_speaker(speaker_id: String) -> void:
 	if _courtroom_ref:
 		_courtroom_ref.clear_highlights()
 		_courtroom_ref.move_camera_to_speaker(speaker_id, "closeup")
+
+func _wait_dialogue_close() -> void:
+	await EventBus.dialogue_next
 
 func _start_noise() -> void:
 	if _config.noise_texts.size() > 0:

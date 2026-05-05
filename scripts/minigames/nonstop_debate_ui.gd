@@ -61,7 +61,7 @@ func _find_courtroom() -> Node:
 func _apply_camera_presets() -> void:
 	if not _courtroom_ref:
 		return
-	var cam := _courtroom_ref.get_camera()
+	var cam: CourtroomCamera = _courtroom_ref.get_camera()
 	if not cam:
 		return
 	cam.set_transition_style(_config.camera_transition)

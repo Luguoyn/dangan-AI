@@ -6,43 +6,36 @@ class_name CourtroomCamera
 
 @export var default_position := Vector3(0, 8, 12)
 @export var default_look_at := Vector3(0, 1.5, 0)
-@export var closeup_offset := Vector3(0, 1.8, -4.0)
-@export var medium_offset := Vector3(0, 2.5, -7.0)
-@export var wide_offset := Vector3(0, 5.0, -12.0)
 @export var overview_position := Vector3(0, 14, 0)
-@export var overview_rotation := Vector3(-90, 0, 0) as Vector3
 
 var _is_animating: bool = false
-var _target_node: Node3D
 
 func _ready() -> void:
 	position = default_position
 	look_at(default_look_at)
 
 func move_to_podium(podium_index: int, shot_type: String = "closeup") -> void:
-	var target_pos: Vector3
-	var offset: Vector3
+	var podium_pos := _get_podium_pos(podium_index)
+	var to_center := (Vector3.ZERO - podium_pos).normalized()
+	var dist: float
+	var height: float
 
 	match shot_type:
-		"closeup":  offset = closeup_offset
-		"medium":   offset = medium_offset
-		"wide":     offset = wide_offset
-		_:          offset = closeup_offset
+		"closeup":  dist = 3.0; height = 1.8
+		"medium":   dist = 5.0; height = 2.5
+		"wide":     dist = 8.0; height = 4.0
+		_:          dist = 3.0; height = 1.8
 
-	var podium_node := _find_podium(podium_index)
-	if podium_node:
-		target_pos = podium_node.global_position + offset
-	else:
-		target_pos = _calculate_podium_position(podium_index) + offset
-
-	_animate_to(target_pos, target_pos - offset)
+	var cam_pos := podium_pos + to_center * dist + Vector3.UP * height
+	var look_pos := podium_pos + Vector3.UP * 1.5
+	_animate_to(cam_pos, look_pos)
 
 func move_to_center() -> void:
 	_animate_to(overview_position, Vector3(0, 1.5, 0))
 
 func move_to_overview() -> void:
 	position = overview_position
-	rotation_degrees = overview_rotation
+	rotation_degrees = Vector3(-90, 0, 0)
 
 func shake(intensity: float, duration: float) -> void:
 	var original := position
@@ -59,12 +52,13 @@ func shake(intensity: float, duration: float) -> void:
 	position = original
 
 func pan(from_podium: int, to_podium: int, duration: float = 1.0) -> void:
-	var from_pos := _calculate_podium_position(from_podium)
-	var to_pos := _calculate_podium_position(to_podium)
-	var mid := (from_pos + to_pos) / 2.0 + Vector3(0, 3, 6)
+	var from_pos := _get_podium_pos(from_podium)
+	var to_pos := _get_podium_pos(to_podium)
+	var mid := (from_pos + to_pos) / 2.0 + Vector3.UP * 5.0
 	var tween := create_tween()
 	tween.tween_property(self, "position", mid, duration * 0.5)
-	tween.tween_property(self, "position", to_pos + Vector3(0, 2, -5), duration * 0.5)
+	var end_pos := to_pos + (Vector3.ZERO - to_pos).normalized() * 4.0 + Vector3.UP * 3.0
+	tween.tween_property(self, "position", end_pos, duration * 0.5)
 	tween.parallel().tween_method(_look_at_target.bind(to_pos), 0.0, 1.0, duration)
 
 func _animate_to(target_pos: Vector3, look_target: Vector3) -> void:
@@ -78,15 +72,11 @@ func _animate_to(target_pos: Vector3, look_target: Vector3) -> void:
 func _look_at_target(_t: float, target: Vector3) -> void:
 	look_at(target)
 
-func _find_podium(podium_index: int) -> Node3D:
+func _get_podium_pos(podium_index: int) -> Vector3:
 	var parent := get_parent()
 	if parent:
 		for child in parent.get_children():
 			if child is PodiumSlot and child.podium_index == podium_index:
-				return child
-	return null
-
-func _calculate_podium_position(podium_index: int) -> Vector3:
+				return child.global_position
 	var angle := TAU * float(podium_index) / 16.0
-	var radius := 6.0
-	return Vector3(cos(angle) * radius, 0, sin(angle) * radius)
+	return Vector3(cos(angle) * 6.0, 0, sin(angle) * 6.0)

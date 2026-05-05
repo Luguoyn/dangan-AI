@@ -13,12 +13,12 @@ var _idle_time: float = 0.0
 var _target_angle: float = 0.0
 var _target_dist: float = 3.0
 var _target_height: float = 1.8
-var _idle_base_pos: Vector3
+var _current_angle: float = 0.0
+var _current_dist: float = 3.0
 
 func _ready() -> void:
 	position = default_position
 	look_at(Vector3(0, 1.5, 0))
-	_idle_base_pos = default_position
 
 func move_to_podium(podium_index: int, shot_type: String = "closeup") -> void:
 	var angle := TAU * float(podium_index) / 16.0
@@ -31,31 +31,39 @@ func move_to_podium(podium_index: int, shot_type: String = "closeup") -> void:
 		"wide":     dist = 8.0; height = 4.0
 		_:          dist = 3.0; height = 1.8
 
-	_target_angle = angle
-	_target_dist = dist
-	_target_height = height
-	var target_pos := _angle_to_pos(angle, dist, height)
-	var look_pos := Vector3(cos(angle) * 6.0, 1.5, sin(angle) * 6.0)
+	var target_angle := angle
+	var target_dist := dist
+	var target_height := height
 
 	if _last_podium >= 0 and _last_podium != podium_index:
-		_rotate_to(target_pos, look_pos, 0.5)
+		_rotate_around_center(_current_angle, target_angle, _current_dist, target_dist, target_height)
 	else:
-		_animate_to(target_pos, look_pos, 0.5)
+		var pos := _angle_to_pos(target_angle, target_dist, target_height)
+		_animate_to(pos, _look_at_podium(target_angle), 0.5)
 
+	_current_angle = target_angle
+	_current_dist = target_dist
+	_target_height = target_height
 	_last_podium = podium_index
-	_idle_base_pos = target_pos
 	_idle_time = 0.0
 
-func _rotate_to(target_pos: Vector3, look_target: Vector3, duration: float) -> void:
+func _rotate_around_center(from_angle: float, to_angle: float, from_dist: float, to_dist: float, to_height: float) -> void:
 	_is_animating = true
-	var start_pos := position
+	var duration := 0.6
 	var tween := create_tween()
-	tween.tween_method(_interp_rotate.bind(start_pos, target_pos, look_target), 0.0, 1.0, duration).set_ease(Tween.EASE_IN_OUT)
-	tween.chain().tween_callback(func(): _is_animating = false)
 
-func _interp_rotate(t: float, from: Vector3, to: Vector3, look: Vector3) -> void:
-	position = from.lerp(to, t)
-	look_at(look)
+	# 绕中心旋转：只改变角度，dist和height在旋转中渐变
+	tween.tween_method(
+		func(t: float):
+			var a := lerp_angle(from_angle, to_angle, t)
+			var d := lerpf(from_dist, to_dist, t)
+			var h := lerpf(_target_height, to_height, t)
+			position = _angle_to_pos(a, d, h)
+			look_at(_look_at_podium(a))
+		,
+		0.0, 1.0, duration
+	).set_ease(Tween.EASE_IN_OUT)
+	tween.chain().tween_callback(func(): _is_animating = false)
 
 func move_to_center() -> void:
 	_animate_to(overview_position, Vector3(0, 1.5, 0), 0.5)
@@ -96,9 +104,8 @@ func _angle_to_pos(angle: float, dist: float, height: float) -> Vector3:
 	var to_center := Vector3(-podium_x, 0, -podium_z).normalized()
 	return Vector3(podium_x, 0, podium_z) + to_center * dist + Vector3.UP * height
 
-func _get_podium_pos(podium_index: int) -> Vector3:
-	var angle := TAU * float(podium_index) / 16.0
-	return Vector3(cos(angle) * 6.0, 0, sin(angle) * 6.0)
+func _look_at_podium(angle: float) -> Vector3:
+	return Vector3(cos(angle) * 6.0, 1.5, sin(angle) * 6.0)
 
 func _process(delta: float) -> void:
 	if _is_animating:
@@ -111,6 +118,5 @@ func _process(delta: float) -> void:
 		sin(_idle_time * 0.7 + 1.0) * 0.08,
 		cos(_idle_time * 1.1) * 0.10
 	)
-	position = _idle_base_pos + drift
-	var look_angle := TAU * float(_last_podium) / 16.0
-	look_at(Vector3(cos(look_angle) * 6.0, 1.5, sin(look_angle) * 6.0))
+	position = _angle_to_pos(_current_angle, _current_dist, _target_height) + drift
+	look_at(_look_at_podium(_current_angle))

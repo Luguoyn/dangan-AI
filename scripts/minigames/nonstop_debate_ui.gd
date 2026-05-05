@@ -221,7 +221,7 @@ func _spawn_noise() -> void:
 	var ndp := DebatePhrase.new()
 	ndp.text = text
 	ndp.speaker_id = ""
-	ndp.is_contradiction = false
+	ndp.hotspots = []
 	ndp.speed = randf_range(80, 140)
 	ndp.lifetime = randf_range(3, 6)
 	var fp := FloatingPhrase.new()
@@ -236,7 +236,7 @@ func _input(event: InputEvent) -> void:
 	if event.is_action_pressed("open_evidence_ring"):
 		_toggle_evidence_ring()
 	if event.is_action_pressed("fire_evidence") and not _is_evidence_ring_open:
-		if _current_target and _current_target.is_contradiction():
+		if _current_target and not _current_hotspot.is_empty():
 			if _selected_evidence_id == "":
 				_auto_select_evidence()
 			_fire_evidence()
@@ -369,6 +369,6 @@ func _clear_old_phrases() -> void:
 func _count_contradictions() -> int:
 	var count := 0
 	for p in _config.phrases:
-		if p.is_contradiction:
+		if p.has_hotspots():
 			count += 1
 	return count

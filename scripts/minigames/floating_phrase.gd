@@ -89,7 +89,7 @@ func _build_text_segments(full_text: String, hotspots: Array) -> Array[Dictionar
 			if idx > 0:
 				segments.append({"text": remaining.substr(0, idx), "is_real": false, "is_fake": false})
 			# 矛盾关键词
-			var is_real := h.get("is_real", false)
+			var is_real: bool = h.get("is_real", false)
 			var seg_data := {"text": keyword, "is_real": is_real, "is_fake": not is_real}
 			if is_real:
 				seg_data["required_evidence_id"] = h.get("required_evidence_id", "")
@@ -97,7 +97,7 @@ func _build_text_segments(full_text: String, hotspots: Array) -> Array[Dictionar
 			remaining = remaining.substr(idx + keyword.length())
 		else:
 			# 关键词未找到，作为独立段添加
-			var is_real := h.get("is_real", false)
+			var is_real: bool = h.get("is_real", false)
 			segments.append({"text": keyword, "is_real": is_real, "is_fake": not is_real})
 
 	# 剩余文本

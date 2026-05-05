@@ -28,6 +28,8 @@ var _phrase_container: Control
 var _noise_timer: Timer
 var _spawn_timer: Timer
 var _courtroom_ref: Node
+var _evidence_popup: VBoxContainer
+var _evidence_popup_visible: bool = false
 
 func _ready() -> void:
 	_build_ui()
@@ -106,6 +108,12 @@ func _build_ui() -> void:
 	_speaker_label.add_theme_font_size_override("font_size", 22)
 	_speaker_label.add_theme_color_override("font_color", Color(1, 1, 1))
 	add_child(_speaker_label)
+
+	_evidence_popup = VBoxContainer.new()
+	_evidence_popup.position = Vector2(30, 200)
+	_evidence_popup.size = Vector2(250, 400)
+	_evidence_popup.hide()
+	add_child(_evidence_popup)
 
 	_hp_label = Label.new()
 	_hp_label.position = Vector2(30, 60)
@@ -235,20 +243,63 @@ func _spawn_noise() -> void:
 func _input(event: InputEvent) -> void:
 	if not _can_aim:
 		return
-	# Tab切换言弹
+	# Tab切换言弹列表
 	if event.is_action_pressed("open_evidence_ring"):
-		_cycle_evidence()
+		_toggle_evidence_popup()
 		return
-	# 左键发射
+	# 滚轮选择（列表显示时）
+	if _evidence_popup_visible and event is InputEventMouseButton:
+		if event.button_index == MOUSE_BUTTON_WHEEL_UP and event.pressed:
+			_current_evidence_index = maxi(0, _current_evidence_index - 1)
+			_refresh_popup()
+			_select_evidence_by_index()
+		elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN and event.pressed:
+			_current_evidence_index = mini(_current_evidence_list.size() - 1, _current_evidence_index + 1)
+			_refresh_popup()
+			_select_evidence_by_index()
+	# 左键
 	if event is InputEventMouseButton and event.button_index == MOUSE_BUTTON_LEFT and event.pressed:
+		if _evidence_popup_visible:
+			_evidence_popup_visible = false
+			_evidence_popup.hide()
 		_fire_evidence()
 
-func _cycle_evidence() -> void:
+func _toggle_evidence_popup() -> void:
+	_evidence_popup_visible = not _evidence_popup_visible
+	if _evidence_popup_visible:
+		_refresh_popup()
+		_evidence_popup.show()
+	else:
+		_evidence_popup.hide()
+
+func _refresh_popup() -> void:
+	for c in _evidence_popup.get_children():
+		c.queue_free()
+	for i in range(_current_evidence_list.size()):
+		var ev = _current_evidence_list[i]
+		var btn = Button.new()
+		btn.text = ev.get("name", "???")
+		btn.custom_minimum_size = Vector2(250, 30)
+		btn.add_theme_font_size_override("font_size", 14)
+		if i == _current_evidence_index:
+			btn.add_theme_color_override("font_color", Color(1, 0.9, 0.3))
+			btn.text = "> " + btn.text
+		else:
+			btn.add_theme_color_override("font_color", Color(0.7, 0.7, 0.7))
+		btn.pressed.connect(_on_evidence_clicked.bind(i))
+		_evidence_popup.add_child(btn)
+
+func _on_evidence_clicked(index: int) -> void:
+	_current_evidence_index = index
+	_select_evidence_by_index()
+	_evidence_popup_visible = false
+	_evidence_popup.hide()
+
+func _select_evidence_by_index() -> void:
 	if _current_evidence_list.is_empty():
 		return
-	_current_evidence_index = (_current_evidence_index + 1) % _current_evidence_list.size()
 	_selected_evidence_id = _current_evidence_list[_current_evidence_index].get("id", "")
-	_info_label.text = "言弹: [%s] | Tab切换 | 左键发射" % _get_current_evidence_name()
+	_info_label.text = "言弹: [%s] | Tab列表 | 滚轮选择 | 左键发射" % _get_current_evidence_name()
 
 func _get_current_evidence_name() -> String:
 	if _current_evidence_list.is_empty():

@@ -51,11 +51,15 @@ func _add_test_evidence() -> void:
 	})
 
 func _input(event: InputEvent) -> void:
+	if event is InputEventKey:
+		if event.keycode == KEY_B and event.pressed:
+			if is_instance_valid(DebateManager._active_debate_ui):
+				DebateManager._active_debate_ui.queue_free()
+			SceneManager.load_scene("main")
+			return
 	if ScriptInterpreter.is_executing or ScriptInterpreter.is_waiting_input:
 		return
 	if event is InputEventKey:
-		if event.keycode == KEY_B and event.pressed:
-			SceneManager.load_scene("main")
 		if event.keycode == KEY_D and event.pressed:
 			show_hp_bar()
 			EventBus.start_nonstop_debate.emit("debate_test_01")
